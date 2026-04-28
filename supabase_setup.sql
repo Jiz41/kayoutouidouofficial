@@ -36,6 +36,19 @@ alter table boards  disable row level security;
 alter table threads disable row level security;
 alter table posts   disable row level security;
 
+-- ▼ RLS無効化が効かない場合の保険：全操作を許可するポリシーも追加
+alter table boards  enable row level security;
+alter table threads enable row level security;
+alter table posts   enable row level security;
+
+drop policy if exists "public_all_boards"  on boards;
+drop policy if exists "public_all_threads" on threads;
+drop policy if exists "public_all_posts"   on posts;
+
+create policy "public_all_boards"  on boards  for all using (true) with check (true);
+create policy "public_all_threads" on threads for all using (true) with check (true);
+create policy "public_all_posts"   on posts   for all using (true) with check (true);
+
 -- インデックス
 create index if not exists idx_threads_board_id on threads(board_id);
 create index if not exists idx_posts_thread_id  on posts(thread_id);
