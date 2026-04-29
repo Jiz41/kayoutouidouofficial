@@ -220,7 +220,7 @@ function subscribeToThread(threadId) {
 
       // el.firstChild移動後にelが空になるバグを修正: postElで参照を保持
       const wrapper = document.createElement('div');
-      wrapper.innerHTML = renderPost(p, posts.length - 1);
+      wrapper.innerHTML = renderPost(p, 0); // i=0でseparator prefixを抑制（外側のsepで管理）
       const postEl = wrapper.firstChild;
       bdMain.appendChild(sep);
       bdMain.appendChild(postEl);
