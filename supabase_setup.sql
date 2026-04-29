@@ -8,6 +8,7 @@ create table if not exists boards (
   id         uuid default gen_random_uuid() primary key,
   name       text not null,
   slug       text not null unique,
+  emoji      text not null default '📋',
   created_at timestamptz default now()
 );
 
@@ -56,14 +57,14 @@ create index if not exists idx_posts_thread_id  on posts(thread_id);
 -- =============================================
 -- 初期板データ
 -- =============================================
-insert into boards (name, slug) values
-  ('競輪',       'keirin'),
-  ('競馬',       'keiba'),
-  ('競艇',       'kyotei'),
-  ('オートレース','auto'),
-  ('パチンコ・スロット','pachislot'),
-  ('雑談',       'misc')
-on conflict (slug) do nothing;
+insert into boards (name, slug, emoji) values
+  ('競輪',             'keirin',    '🚴'),
+  ('競馬',             'keiba',     '🐎'),
+  ('競艇',             'kyotei',    '⛵'),
+  ('オートレース',     'auto',      '🏍'),
+  ('パチンコ・スロット','pachislot', '🎰'),
+  ('雑談',             'misc',      '💬')
+on conflict (slug) do update set emoji = excluded.emoji;
 
 -- =============================================
 -- RPC: 投稿挿入（post_number 採番をアトミックに）

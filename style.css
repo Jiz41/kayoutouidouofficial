@@ -1,0 +1,337 @@
+/* ================================================================
+   華耀東夷堂 — スタイルシート
+   編集箇所のガイド:
+   - デザイントークン（色・フォント）: 各セレクタに直書き
+   - ベースカラー:   #0f1420
+   - アクセントカラー: #c8a060
+   - フォント: Noto Sans JP / IBM Plex Mono
+================================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: #060a10; /* 画面外の最暗部 */
+  font-family: 'Noto Sans JP', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── レターボックス背景レイヤー（コンテンツエリア外にのみ表示） ── */
+#bg-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── スマホフレーム（コンテンツエリア） ── */
+#stage {
+  width: 100%;
+  height: 100%;
+  max-width: 430px;
+  position: relative;
+  overflow: hidden;
+  background: #0f1420;
+  z-index: 1;
+  border: 1.5px solid rgba(180,185,210,0.18);   /* ベゼル線 */
+  border-radius: 36px;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.55), 0 28px 80px rgba(0,0,0,0.65);
+}
+
+/* ================================================================
+   SCENE 1: スプラッシュ
+================================================================ */
+#scene-splash {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 36px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+#scene-splash.visible { opacity: 1; }
+#scene-splash.out     { opacity: 0; transition: opacity 0.5s ease; }
+
+#splash-logo {
+  width: 140px; height: 140px;
+  filter: sepia(0.6) saturate(3) hue-rotate(-25deg) brightness(1.05);
+}
+
+/* ローディングバー */
+#loader-wrap {
+  width: 200px; height: 1px;
+  background: rgba(200,160,96,0.15);
+  position: relative; overflow: hidden;
+}
+#loader-bar {
+  position: absolute; top: 0; left: 0; height: 100%;
+  width: 0%;
+  background: #c8a060;
+}
+
+/* ================================================================
+   SCENE 2: 利用規約
+================================================================ */
+#scene-terms {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+#scene-terms.visible { opacity: 1; pointer-events: all; }
+#scene-terms.out     { opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+
+#terms-header      { flex-shrink: 0; padding: 48px 28px 20px; }
+#terms-site-name   {
+  font-size: 10px; letter-spacing: 0.18em;
+  color: #c8a060; font-weight: 300;
+  font-family: 'IBM Plex Mono', monospace;
+}
+#terms-title       { margin-top: 10px; font-size: 18px; font-weight: 300; color: #f0ece4; letter-spacing: 0.05em; line-height: 1.5; }
+#terms-subtitle    { margin-top: 6px; font-size: 11px; color: #5a6278; letter-spacing: 0.03em; }
+
+#terms-scroll {
+  flex: 1; overflow-y: auto; padding: 0 28px 20px;
+  scroll-behavior: smooth;
+}
+#terms-scroll::-webkit-scrollbar       { width: 2px; }
+#terms-scroll::-webkit-scrollbar-thumb { background: #2a3040; }
+
+/* 規約本文（通常版・ひらがな版共通） */
+.terms-body        { display: none; font-size: 12.5px; line-height: 2; color: #9aa0b0; font-weight: 300; letter-spacing: 0.02em; }
+.terms-body.active { display: block; }
+.terms-body h2     { font-size: 11px; font-weight: 500; color: #c8a060; letter-spacing: 0.1em; margin: 24px 0 8px; }
+.terms-body p      { margin-bottom: 8px; }
+.terms-body ul     { padding-left: 0; list-style: none; }
+.terms-body ul li  { padding-left: 1em; text-indent: -1em; color: #7a8090; }
+.terms-body .footer-note { margin-top: 32px; font-size: 10px; color: #3a4058; letter-spacing: 0.05em; }
+
+/* フェードマスク */
+#terms-fade-top    { position: absolute; left: 0; right: 0; height: 40px; pointer-events: none; top: 130px; background: linear-gradient(to bottom, #0f1420, transparent); z-index: 2; }
+#terms-fade-bottom { position: absolute; left: 0; right: 0; height: 60px; pointer-events: none; bottom: 90px; background: linear-gradient(to top, #0f1420, transparent); z-index: 2; }
+
+#terms-footer {
+  flex-shrink: 0; padding: 12px 28px 36px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  position: relative; z-index: 3;
+}
+
+/* 同意ボタン */
+#btn-agree {
+  width: 100%; padding: 14px 0;
+  background: #c8a060; color: #0f1420;
+  font-size: 13px; font-weight: 500; letter-spacing: 0.1em;
+  border: none; cursor: pointer; border-radius: 2px;
+  opacity: 0.3; pointer-events: none;
+  transition: opacity 0.3s ease;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+#btn-agree.active        { opacity: 1; pointer-events: all; }
+#btn-agree.active:active { opacity: 0.85; }
+
+/* ひらがな切替リンク */
+#link-kana {
+  font-size: 10px; color: #3a4058; letter-spacing: 0.06em;
+  cursor: pointer; background: none; border: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: color 0.2s;
+}
+#link-kana:hover { color: #7a8090; }
+
+/* ================================================================
+   SCENE 3: 掲示板
+================================================================ */
+#scene-main {
+  position: absolute; inset: 0; z-index: 5;
+  opacity: 0; transform: scale(0.95);
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.34,1.2,0.64,1);
+}
+#scene-main.visible { opacity: 1; transform: scale(1); pointer-events: all; }
+
+#board-root {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  background: #0f1420;
+  position: relative; overflow: hidden;
+}
+#board-root ::-webkit-scrollbar       { width: 3px; }
+#board-root ::-webkit-scrollbar-track { background: transparent; }
+#board-root ::-webkit-scrollbar-thumb { background: #2a3040; border-radius: 2px; }
+
+/* ── サイドバー ── */
+#bd-overlay {
+  display: none; position: absolute; inset: 0;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(1px);
+  z-index: 40;
+}
+#bd-overlay.open { display: block; }
+
+#bd-sidebar {
+  position: absolute; top: 0; left: 0; bottom: 0; width: 240px;
+  background: #0b0f1a; z-index: 50;
+  transform: translateX(-100%);
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  display: flex; flex-direction: column;
+}
+#bd-sidebar.open { transform: translateX(0); }
+
+#bd-sidebar-hdr {
+  padding: 16px 16px 12px; border-bottom: 1px solid #1a2236;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+#bd-sidebar-hdr .bd-logo          { width: 36px; height: 36px; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+#bd-sidebar-hdr .bd-logo img      { width: 100%; height: 100%; object-fit: cover; }
+
+.bd-site-name { font-size: 13px; font-weight: 700; color: #f0ece4; letter-spacing: 0.02em; }
+.bd-site-kana { font-size: 10px; color: #5a6278; letter-spacing: 0.05em; }
+
+#bd-nav-scroll  { flex: 1; overflow-y: auto; padding: 12px 8px; }
+.bd-nav-label   { font-size: 10px; color: #5a6278; letter-spacing: 0.1em; padding: 4px 8px 8px; font-weight: 700; }
+
+.bd-board-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 9px 10px; background: transparent;
+  border: none; border-radius: 6px; cursor: pointer;
+  transition: background 0.15s; text-align: left;
+}
+.bd-board-btn:hover           { background: #141b2a; }
+.bd-board-btn.active          { background: #1a2236; }
+.bd-board-btn .bd-emoji       { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+.bd-board-btn .bd-bname       { font-size: 13px; color: #ddd6c8; letter-spacing: 0.02em; }
+.bd-board-btn.active .bd-bname{ color: #c8a060; font-weight: 700; }
+.bd-board-btn .bd-indicator   { margin-left: auto; width: 3px; height: 16px; background: #c8a060; border-radius: 2px; flex-shrink: 0; display: none; }
+.bd-board-btn.active .bd-indicator { display: block; }
+
+#bd-sidebar-ftr { padding: 12px 16px; border-top: 1px solid #1a2236; font-size: 10px; color: #5a6278; flex-shrink: 0; }
+
+/* ── ヘッダー ── */
+#bd-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 14px; height: 52px;
+  background: #0d1220; border-bottom: 1px solid #1a2236;
+  flex-shrink: 0; z-index: 10; position: relative;
+}
+#bd-hamburger {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;
+}
+#bd-hamburger span  { display: block; width: 18px; height: 1.5px; background: #5a6278; border-radius: 1px; }
+#bd-header-title    { flex: 1; font-size: 15px; font-weight: 700; color: #f0ece4; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+#bd-back-btn {
+  display: none; background: none; border: none;
+  color: #c8a060; font-size: 12px; cursor: pointer;
+  padding: 4px 8px; letter-spacing: 0.05em;
+  font-family: 'Noto Sans JP', sans-serif; flex-shrink: 0;
+}
+
+.bd-logo-sm     { width: 36px; height: 36px; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+.bd-logo-sm img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── メインコンテンツ ── */
+#bd-full-banner {
+  display: none;
+  background: rgba(192,80,80,0.12); color: #c05050;
+  font-size: 11px; text-align: center;
+  padding: 7px 14px; border-bottom: 1px solid rgba(192,80,80,0.3);
+  flex-shrink: 0; letter-spacing: 0.03em;
+}
+#bd-main { flex: 1; overflow-y: auto; padding-bottom: 4px; }
+
+.bd-loading, .bd-empty {
+  text-align: center; padding: 48px 20px;
+  color: #5a6278; font-size: 13px; letter-spacing: 0.04em;
+}
+
+/* スレッドリスト */
+.bd-thread-item         { padding: 12px 16px; cursor: pointer; transition: background 0.1s; }
+.bd-thread-item:hover   { background: #141b2a; }
+.bd-thread-sep          { height: 0.5px; background: rgba(255,255,255,0.04); filter: blur(0.4px); margin: 0 16px; }
+.bd-thread-title        { font-size: 13.5px; color: #f0ece4; margin-bottom: 3px; letter-spacing: 0.01em; }
+.bd-thread-meta         { font-size: 10px; color: #5a6278; font-family: 'IBM Plex Mono', monospace; }
+.bd-thread-count        { float: right; font-size: 11px; color: #c8a060; margin-left: 8px; font-family: 'IBM Plex Mono', monospace; }
+.bd-thread-item.full .bd-thread-title { color: #5a6278; }
+.bd-thread-item.full .bd-thread-count { color: #c05050; }
+
+/* 投稿 */
+.bd-post              { padding: 10px 16px; }
+.bd-post.system       { border-left: 2px solid #8a6a3a; margin: 0 16px; }
+.bd-post.highlight    { background: rgba(200,160,96,0.08); }
+.bd-post-hdr          { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.bd-post-num          { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #c8a060; font-weight: 500; cursor: pointer; letter-spacing: 0.03em; }
+.bd-post-id           { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #c8a060; font-weight: 500; letter-spacing: 0.03em; }
+.bd-post-time         { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: #3a4058; margin-left: 2px; }
+.bd-post-body         { font-size: 13.5px; line-height: 1.75; color: #f0ece4; word-break: break-word; letter-spacing: 0.01em; }
+.bd-post.system .bd-post-body { color: #ddd6c8; }
+.bd-post-body a       { color: #c8a060; text-decoration: none; }
+.bd-post-body a.anchor{ color: #7ab8e0; }
+.bd-post-body .inline-img { max-width: 100%; max-height: 260px; display: block; margin-top: 6px; border-radius: 3px; }
+
+/* ── 入力バー ── */
+#bd-input-bar {
+  display: none; padding: 10px 14px 14px;
+  background: #0f1420; border-top: 1px solid #1a2236;
+  flex-shrink: 0;
+}
+#bd-form { display: flex; align-items: flex-end; gap: 10px; }
+#bd-textarea {
+  flex: 1; resize: none; border: none; outline: none;
+  background: #1a2236; color: #f0ece4; border-radius: 8px;
+  padding: 10px 12px; font-size: 13.5px;
+  font-family: 'Noto Sans JP', sans-serif;
+  line-height: 1.6; overflow: hidden; caret-color: #c8a060;
+  min-height: 40px; max-height: 120px;
+}
+#bd-textarea::placeholder { color: #5a6278; }
+#bd-send-btn {
+  width: 38px; height: 38px; border-radius: 8px;
+  background: #c8a060; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: opacity 0.15s;
+}
+#bd-send-btn:disabled    { opacity: 0.4; cursor: default; }
+#bd-send-btn svg         { pointer-events: none; }
+
+/* ── スレッド作成モーダル（管理ページ用・一般画面からは非表示） ── */
+#bd-modal {
+  display: none; position: absolute; inset: 0;
+  background: rgba(0,0,0,0.75); z-index: 200;
+  align-items: center; justify-content: center; padding: 20px;
+}
+#bd-modal.open         { display: flex; }
+#bd-modal-box          { background: #161d2e; border: 1px solid #c8a060; border-radius: 8px; padding: 20px; width: 100%; }
+#bd-modal-box h3       { color: #c8a060; margin-bottom: 14px; font-size: 14px; font-weight: 500; letter-spacing: 0.05em; }
+#bd-modal-box input,
+#bd-modal-box textarea {
+  width: 100%; background: #0f1420; border: 1px solid #1a2236;
+  border-radius: 6px; color: #f0ece4; padding: 9px 12px;
+  font-size: 13px; font-family: 'Noto Sans JP', sans-serif;
+  margin-bottom: 10px; display: block; outline: none;
+}
+#bd-modal-box input:focus,
+#bd-modal-box textarea:focus { border-color: #c8a060; }
+#bd-modal-box textarea { min-height: 72px; resize: none; }
+
+.bd-modal-actions          { display: flex; gap: 8px; }
+.bd-modal-actions button   { flex: 1; padding: 10px; border-radius: 4px; font-size: 13px; cursor: pointer; border: none; font-family: 'Noto Sans JP', sans-serif; }
+#bd-modal-submit           { background: #c8a060; color: #0f1420; font-weight: 700; }
+#bd-modal-cancel           { background: none; border: 1px solid #3a4058 !important; color: #5a6278; }
+
+/* ── アンカーポップアップ ── */
+#bd-anchor-popup {
+  display: none; position: absolute;
+  background: #1c2540; border: 1px solid #c8a060;
+  border-radius: 6px; padding: 10px 12px;
+  max-width: 88%; font-size: 12px; z-index: 300;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  line-height: 1.6; color: #ddd6c8; pointer-events: none;
+}
