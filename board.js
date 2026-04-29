@@ -217,12 +217,15 @@ function subscribeToThread(threadId) {
 
       const sep = document.createElement('div');
       sep.className = 'bd-thread-sep';
-      const el = document.createElement('div');
-      el.innerHTML = renderPost(p, posts.length - 1);
-      bdMain.appendChild(sep);
-      bdMain.appendChild(el.firstChild);
 
-      el.querySelectorAll('.bd-post-num').forEach(e => {
+      // el.firstChild移動後にelが空になるバグを修正: postElで参照を保持
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = renderPost(p, posts.length - 1);
+      const postEl = wrapper.firstChild;
+      bdMain.appendChild(sep);
+      bdMain.appendChild(postEl);
+
+      postEl.querySelectorAll('.bd-post-num').forEach(e => {
         e.addEventListener('click', () => quotePost(Number(e.dataset.num)));
       });
 
@@ -234,7 +237,12 @@ function subscribeToThread(threadId) {
       }
       bdMain.scrollTop = bdMain.scrollHeight;
     })
-    .subscribe();
+    .subscribe((status, err) => {
+      if (status === 'SUBSCRIBED')    console.log('[RT] 購読成功:', threadId);
+      if (status === 'CHANNEL_ERROR') console.error('[RT] チャンネルエラー:', err);
+      if (status === 'TIMED_OUT')     console.warn('[RT] タイムアウト');
+      if (status === 'CLOSED')        console.log('[RT] チャンネルクローズ');
+    });
 }
 
 function unsubscribe() {

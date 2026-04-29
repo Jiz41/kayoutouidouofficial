@@ -55,6 +55,19 @@ create index if not exists idx_threads_board_id on threads(board_id);
 create index if not exists idx_posts_thread_id  on posts(thread_id);
 
 -- =============================================
+-- Realtime設定（postgres_changes に必須）
+-- =============================================
+alter table posts   replica identity full;
+alter table threads replica identity full;
+alter table boards  replica identity full;
+
+-- supabase_realtime パブリケーションにテーブルを追加
+-- （既に追加済みの場合はエラーになるが無視してよい）
+alter publication supabase_realtime add table posts;
+alter publication supabase_realtime add table threads;
+alter publication supabase_realtime add table boards;
+
+-- =============================================
 -- 初期板データ
 -- =============================================
 insert into boards (name, slug, emoji) values
