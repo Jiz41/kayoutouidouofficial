@@ -344,6 +344,7 @@ function renderBoardsTable() {
             <button class="btn btn-ghost" data-order-up="${i}" style="padding:4px 8px" ${i===0?'disabled':''}>↑</button>
             <button class="btn btn-ghost" data-order-dn="${i}" style="padding:4px 8px" ${i===boardsCache.length-1?'disabled':''}>↓</button>
           </div>
+          <button class="btn btn-ghost" data-edit-board="${esc(b.id)}" data-emoji="${esc(b.emoji)}" data-name="${esc(b.name)}" style="font-size:11px">編集</button>
           <button class="btn btn-danger" data-del-board="${esc(b.id)}" style="font-size:11px">削除</button>
         </div></td>
       </tr>`).join('')}
@@ -355,6 +356,9 @@ function renderBoardsTable() {
   });
   wrap.querySelectorAll('[data-order-dn]').forEach(btn => {
     btn.addEventListener('click', () => moveBoardOrder(parseInt(btn.dataset.orderDn), 1));
+  });
+  wrap.querySelectorAll('[data-edit-board]').forEach(btn => {
+    btn.addEventListener('click', () => editBoard(btn.dataset.editBoard, btn.dataset.emoji, btn.dataset.name));
   });
   wrap.querySelectorAll('[data-del-board]').forEach(btn => {
     btn.addEventListener('click', () => deleteBoard(btn.dataset.delBoard));
@@ -370,6 +374,16 @@ async function moveBoardOrder(idx, dir) {
     sb.from('boards').update({ sort_order: ob }).eq('id', a.id),
     sb.from('boards').update({ sort_order: oa }).eq('id', b.id),
   ]);
+  await loadBoards();
+}
+
+async function editBoard(id, currentEmoji, currentName) {
+  const emoji = prompt('絵文字を入力', currentEmoji);
+  if (emoji === null) return;
+  const name = prompt('板名を入力', currentName);
+  if (!name || name === null) return;
+  const { error } = await sb.from('boards').update({ emoji: emoji.trim() || currentEmoji, name: name.trim() }).eq('id', id);
+  if (error) { alert('編集失敗: ' + error.message); return; }
   await loadBoards();
 }
 
