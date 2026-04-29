@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>華耀東夷堂</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    :root {
+      --bg:#0f1420; --bg2:#161d2e; --bg3:#1c2540;
+      --gold:#c8a060; --text:#d0c4b0; --text2:#8a7d6e;
+      --border:#2a3550; --red:#c05050; --anchor:#7ab8e0;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;font-size:14px;line-height:1.6}
+    #header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--gold);padding:10px 14px;display:flex;align-items:center;gap:10px}
+    #header h1{font-size:16px;color:var(--gold);letter-spacing:2px;flex:1}
+    #back-btn{display:none;background:none;border:1px solid var(--gold);color:var(--gold);padding:4px 10px;border-radius:4px;font-size:12px;cursor:pointer}
+    #full-banner{display:none;text-align:center;padding:8px;background:rgba(192,80,80,.15);color:var(--red);font-size:13px;border-bottom:1px solid var(--red)}
+    #main{padding-bottom:130px}
+    .section-title{padding:10px 16px 6px;font-size:11px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+    .loading,.empty{text-align:center;padding:40px 20px;color:var(--text2);font-size:13px}
+    .board-item{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+    .board-item:hover,.board-item:active{background:var(--bg2)}
+    .board-name{font-size:15px;color:var(--gold)}
+    .board-arrow{margin-left:auto;color:var(--text2);font-size:18px}
+    .thread-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;overflow:hidden}
+    .thread-item:hover,.thread-item:active{background:var(--bg2)}
+    .thread-title{font-size:14px;color:var(--text);margin-bottom:3px}
+    .thread-meta{font-size:11px;color:var(--text2)}
+    .thread-count{float:right;font-size:12px;color:var(--gold);margin-left:8px}
+    .thread-item.full .thread-title{color:var(--text2)}
+    .thread-item.full .thread-count{color:var(--red)}
+    #new-thread-btn{display:block;width:calc(100% - 32px);margin:12px 16px;padding:10px;background:none;border:1px solid var(--gold);color:var(--gold);border-radius:6px;font-size:14px;cursor:pointer}
+    #new-thread-btn:active{background:rgba(200,160,96,.1)}
+    .post{padding:10px 14px;border-bottom:1px solid var(--border)}
+    .post.highlight{background:rgba(200,160,96,.1)}
+    .post-header{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+    .post-num{color:var(--gold);font-size:13px;font-weight:bold;cursor:pointer}
+    .post-num:hover{text-decoration:underline}
+    .post-id{color:var(--text2);font-size:11px;font-family:monospace}
+    .post-time{color:var(--text2);font-size:11px;margin-left:auto}
+    .post-body{font-size:13px;line-height:1.75;word-break:break-word}
+    .post-body a{color:var(--gold);text-decoration:none}
+    .post-body a:hover{text-decoration:underline}
+    .post-body .anchor{color:var(--anchor)}
+    .post-body .inline-img{max-width:100%;max-height:280px;display:block;margin-top:6px;border-radius:4px}
+    #anchor-popup{display:none;position:fixed;background:var(--bg3);border:1px solid var(--gold);border-radius:6px;padding:10px 12px;max-width:88vw;font-size:12px;z-index:300;box-shadow:0 4px 16px rgba(0,0,0,.5);line-height:1.6;color:var(--text)}
+    #post-form{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);padding:10px 14px;z-index:100}
+    #post-form.active{display:block}
+    #post-form textarea{width:100%;min-height:58px;max-height:110px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px;font-size:13px;resize:none;font-family:inherit;margin-bottom:8px;display:block}
+    #post-form textarea:focus{outline:none;border-color:var(--gold)}
+    #post-form .form-row{display:flex;gap:8px}
+    #submit-btn{flex:1;padding:9px;background:var(--gold);color:var(--bg);border:none;border-radius:6px;font-size:14px;font-weight:bold;cursor:pointer}
+    #submit-btn:disabled{opacity:.5;cursor:default}
+    #modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;align-items:center;justify-content:center;padding:20px}
+    #modal-overlay.active{display:flex}
+    #modal-box{background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:20px;width:100%;max-width:480px}
+    #modal-box h3{color:var(--gold);margin-bottom:14px;font-size:15px}
+    #modal-box input,#modal-box textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px;font-size:13px;font-family:inherit;margin-bottom:10px;display:block}
+    #modal-box input:focus,#modal-box textarea:focus{outline:none;border-color:var(--gold)}
+    #modal-box textarea{min-height:76px;resize:none}
+    #modal-box .modal-actions{display:flex;gap:8px}
+    #modal-box button{flex:1;padding:9px;border-radius:6px;font-size:14px;cursor:pointer;border:none}
+    .btn-submit{background:var(--gold);color:var(--bg);font-weight:bold}
+    .btn-cancel{background:none !important;border:1px solid var(--border) !important;color:var(--text2) !important}
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <button id="back-btn" onclick="goBack()">← 戻る</button>
+  <h1>華耀東夷堂</h1>
+</div>
+
+<div id="full-banner">このスレッドは1000投稿に達しました。新しいスレッドを立ててください。</div>
+
+<div id="main"></div>
+
+<div id="post-form">
+  <textarea id="post-body" placeholder="投稿内容を入力… (Ctrl+Enter で送信)"></textarea>
+  <div class="form-row">
+    <button id="submit-btn" onclick="submitPost()">書き込む</button>
+  </div>
+</div>
+
+<div id="modal-overlay">
+  <div id="modal-box">
+    <h3>新しいスレッドを立てる</h3>
+    <input type="text" id="thread-title-input" placeholder="スレッドタイトル" maxlength="100">
+    <textarea id="thread-body-input" placeholder="本文（最初の投稿）" rows="3"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+      <button class="btn-submit" onclick="submitThread()">作成する</button>
+    </div>
+  </div>
+</div>
+
+<div id="anchor-popup"></div>
+
+<script>
+const SUPABASE_URL = 'https://pqqrfzofzxiuzvxdrcai.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_t1AfJtM9h_gYkxg9QL3GXg_-CVV0jaT';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let view = 'boards', currentBoard = null, currentThread = null;
+let realtimeChannel = null, posts = [];
+
+let myAnonId = localStorage.getItem('kayou_anon_id');
+if (!myAnonId) {
+  myAnonId = Math.random().toString(36).slice(2,10).toUpperCase();
+  localStorage.setItem('kayou_anon_id', myAnonId);
+}
+
+const main       = document.getElementById('main');
+const postForm   = document.getElementById('post-form');
+const backBtn    = document.getElementById('back-btn');
+const fullBanner = document.getElementById('full-banner');
+
+// ── 板一覧 ──────────────────────────────────────
+async function showBoards() {
+  view = 'boards'; currentBoard = null; currentThread = null;
+  unsubscribe();
+  postForm.classList.remove('active');
+  backBtn.style.display = 'none';
+  fullBanner.style.display = 'none';
+  main.innerHTML = '<div class="loading">読み込み中…</div>';
+
+  const { data, error } = await sb.from('boards').select('*').order('created_at');
+  if (error) { main.innerHTML = '<div class="empty">エラー: ' + escHtml(error.message) + '</div>'; return; }
+  if (!data.length) { main.innerHTML = '<div class="empty">板がありません</div>'; return; }
+
+  main.innerHTML = '<div class="section-title">板一覧</div>' +
+    data.map(b => '<div class="board-item" onclick="showThreads(' + encJSON(b) + ')">' +
+      '<span class="board-name">【' + escHtml(b.name) + '】</span>' +
+      '<span class="board-arrow">›</span></div>').join('');
+}
+
+// ── スレッド一覧 ────────────────────────────────
+async function showThreads(board) {
+  view = 'threads'; currentBoard = board; currentThread = null;
+  unsubscribe();
+  postForm.classList.remove('active');
+  fullBanner.style.display = 'none';
+  backBtn.style.display = 'inline-block';
+  main.innerHTML = '<div class="loading">読み込み中…</div>';
+
+  const { data, error } = await sb.from('threads')
+    .select('*').eq('board_id', board.id)
+    .order('created_at', { ascending: false });
+
+  if (error) { main.innerHTML = '<div class="empty">エラー: ' + escHtml(error.message) + '</div>'; return; }
+
+  let html = '<button id="new-thread-btn" onclick="openNewThreadModal()">＋ 新しいスレッドを立てる</button>';
+  if (!data.length) {
+    html += '<div class="empty">スレッドがありません</div>';
+  } else {
+    html += data.map(t =>
+      '<div class="thread-item' + (!t.is_active ? ' full' : '') + '" onclick="showPosts(' + encJSON(t) + ')">' +
+      '<span class="thread-count">' + t.post_count + (!t.is_active ? ' 【満】' : '') + '</span>' +
+      '<div class="thread-title">' + escHtml(t.title) + '</div>' +
+      '<div class="thread-meta">' + formatDate(t.created_at) + '</div></div>'
+    ).join('');
+  }
+  main.innerHTML = html;
+}
+
+// ── 投稿一覧 ────────────────────────────────────
+async function showPosts(thread) {
+  view = 'posts'; currentThread = thread;
+  unsubscribe();
+  backBtn.style.display = 'inline-block';
+  main.innerHTML = '<div class="loading">読み込み中…</div>';
+  posts = [];
+
+  const { data, error } = await sb.from('posts')
+    .select('*').eq('thread_id', thread.id).order('post_number');
+
+  if (error) { main.innerHTML = '<div class="empty">エラー: ' + escHtml(error.message) + '</div>'; return; }
+
+  posts = data || [];
+  renderAllPosts();
+
+  if (thread.is_active) {
+    postForm.classList.add('active');
+    fullBanner.style.display = 'none';
+    subscribeToThread(thread.id);
+  } else {
+    postForm.classList.remove('active');
+    fullBanner.style.display = 'block';
+  }
+}
+
+function renderAllPosts() {
+  if (!posts.length) { main.innerHTML = '<div class="empty">投稿がありません</div>'; return; }
+  main.innerHTML = posts.map(renderPost).join('');
+}
+
+function renderPost(p) {
+  return '<div class="post" id="post-' + p.post_number + '">' +
+    '<div class="post-header">' +
+    '<span class="post-num" onclick="quotePost(' + p.post_number + ')">' + p.post_number + '</span>' +
+    '<span class="post-id">ID:' + escHtml(p.anon_id) + '</span>' +
+    '<span class="post-time">' + formatDate(p.created_at) + '</span>' +
+    '</div><div class="post-body">' + processBody(p.body) + '</div></div>';
+}
+
+// ── Realtime ────────────────────────────────────
+function subscribeToThread(threadId) {
+  realtimeChannel = sb.channel('posts_' + threadId)
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'posts',
+      filter: 'thread_id=eq.' + threadId
+    }, payload => {
+      const p = payload.new;
+      if (posts.find(x => x.id === p.id)) return;
+      posts.push(p);
+      const el = document.createElement('div');
+      el.innerHTML = renderPost(p);
+      main.appendChild(el.firstChild);
+      currentThread.post_count = (currentThread.post_count || 0) + 1;
+      if (currentThread.post_count >= 1000) {
+        currentThread.is_active = false;
+        postForm.classList.remove('active');
+        fullBanner.style.display = 'block';
+      }
+    }).subscribe();
+}
+
+function unsubscribe() {
+  if (realtimeChannel) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
+}
+
+// ── 投稿送信 ────────────────────────────────────
+async function submitPost() {
+  const ta = document.getElementById('post-body');
+  const body = ta.value.trim();
+  if (!body || !currentThread || !currentThread.is_active) return;
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  const { error } = await sb.rpc('insert_post', {
+    p_thread_id: currentThread.id, p_body: body, p_anon_id: myAnonId
+  });
+  btn.disabled = false;
+  if (!error) ta.value = '';
+  else alert('投稿失敗: ' + error.message);
+}
+
+function openNewThreadModal() {
+  document.getElementById('modal-overlay').classList.add('active');
+  setTimeout(() => document.getElementById('thread-title-input').focus(), 50);
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+  document.getElementById('thread-title-input').value = '';
+  document.getElementById('thread-body-input').value = '';
+}
+async function submitThread() {
+  const title = document.getElementById('thread-title-input').value.trim();
+  const body  = document.getElementById('thread-body-input').value.trim();
+  if (!title || !body) { alert('タイトルと本文を入力してください'); return; }
+  const { error } = await sb.rpc('create_thread', {
+    p_board_id: currentBoard.id, p_title: title, p_body: body, p_anon_id: myAnonId
+  });
+  if (error) { alert('スレッド作成失敗: ' + error.message); return; }
+  closeModal();
+  showThreads(currentBoard);
+}
+
+// ── >>アンカー ──────────────────────────────────
+function quotePost(num) {
+  const ta = document.getElementById('post-body');
+  if (!ta) return;
+  const pos = ta.selectionStart;
+  const ins = '>>' + num + '\n';
+  ta.value = ta.value.slice(0, pos) + ins + ta.value.slice(pos);
+  ta.selectionStart = ta.selectionEnd = pos + ins.length;
+  ta.focus();
+}
+function scrollToPost(num) {
+  const el = document.getElementById('post-' + num);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.add('highlight');
+  setTimeout(() => el.classList.remove('highlight'), 1500);
+}
+
+const popup = document.getElementById('anchor-popup');
+let popupTimer = null;
+function showAnchorPopup(e, num) {
+  const p = posts.find(x => x.post_number == num);
+  if (!p) return;
+  popup.innerHTML = '<strong style="color:var(--gold)">&gt;&gt;' + num + '</strong> ID:' + escHtml(p.anon_id) + '<br>' + processBody(p.body).substring(0, 300);
+  popup.style.display = 'block';
+  const r = e.target.getBoundingClientRect();
+  let top = r.bottom + 6;
+  if (top + 160 > window.innerHeight) top = r.top - 170;
+  popup.style.top  = Math.max(4, top) + 'px';
+  popup.style.left = Math.min(r.left, window.innerWidth - 280) + 'px';
+  clearTimeout(popupTimer);
+}
+function hideAnchorPopup() {
+  popupTimer = setTimeout(() => { popup.style.display = 'none'; }, 250);
+}
+
+// ── 本文パース ──────────────────────────────────
+function processBody(body) {
+  let s = escHtml(body);
+  // >>N
+  s = s.replace(/&gt;&gt;(\d+)/g, (_, n) =>
+    '<a class="anchor" href="#post-' + n + '"' +
+    ' onmouseenter="showAnchorPopup(event,' + n + ')" onmouseleave="hideAnchorPopup()"' +
+    ' onclick="event.preventDefault();scrollToPost(' + n + ')">&gt;&gt;' + n + '</a>');
+  // X/Twitter 画像
+  s = s.replace(/(https?:\/\/pbs\.twimg\.com\/media\/[A-Za-z0-9_\-?=&%.]+)/g, url => {
+    const u = url.replace(/&amp;/g,'&');
+    return '<a href="' + u + '" target="_blank" rel="noopener"><img src="' + u + '" class="inline-img" loading="lazy"></a>';
+  });
+  // その他URL
+  s = s.replace(/(https?:\/\/(?!pbs\.twimg\.com\/media\/)[^\s<&]+)/g, url =>
+    '<a href="' + url + '" target="_blank" rel="noopener">' + url + '</a>');
+  return s.replace(/\n/g, '<br>');
+}
+
+// ── ユーティリティ ──────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function encJSON(obj) {
+  return "'" + JSON.stringify(obj).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + "'";
+}
+function formatDate(iso) {
+  const d = new Date(iso), p = n => String(n).padStart(2,'0');
+  return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+}
+function goBack() {
+  if (view === 'posts') showThreads(currentBoard);
+  else if (view === 'threads') showBoards();
+}
+
+document.getElementById('post-body').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) submitPost();
+});
+document.addEventListener('scroll', hideAnchorPopup, true);
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+showBoards();
+</script>
+</body>
+</html>
