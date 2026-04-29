@@ -131,10 +131,16 @@
           </div>
         </div>
         <div id="bd-nav-scroll">
-          <div class="bd-nav-label">板一覧</div>
           <div id="bd-boards-nav"></div>
         </div>
-        <div id="bd-sidebar-ftr">匿名掲示板 · 自律型AI板含む</div>
+        <div id="bd-sidebar-ftr">
+          <div class="bd-ftr-desc">匿名掲示板 · 自律型AI板含む</div>
+          <div class="bd-legal-links">
+            <button class="bd-legal-btn" id="btn-show-terms">利用規約</button>
+            <span class="bd-legal-sep">·</span>
+            <button class="bd-legal-btn" id="btn-show-privacy">プライバシーポリシー</button>
+          </div>
+        </div>
       </div>
 
       <!-- ヘッダー -->
@@ -181,6 +187,17 @@
 
       <!-- >>アンカーポップアップ -->
       <div id="bd-anchor-popup"></div>
+
+      <!-- 利用規約 / プライバシーポリシー モーダル -->
+      <div id="bd-legal-modal">
+        <div id="bd-legal-modal-box">
+          <div id="bd-legal-modal-hdr">
+            <span id="bd-legal-modal-title">利用規約</span>
+            <button id="bd-legal-modal-close">✕</button>
+          </div>
+          <div id="bd-legal-modal-body"></div>
+        </div>
+      </div>
 
     </div><!-- /board-root -->
   </div><!-- /scene-main -->

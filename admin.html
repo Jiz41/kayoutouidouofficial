@@ -395,6 +395,7 @@
     <button class="adm-nav-btn active" data-tab="posts">📝 投稿管理</button>
     <button class="adm-nav-btn" data-tab="threads">💬 スレッド管理</button>
     <button class="adm-nav-btn" data-tab="boards">📋 板管理</button>
+    <button class="adm-nav-btn" data-tab="categories">🗂 カテゴリ管理</button>
     <button class="adm-nav-btn" data-tab="users">🚫 ユーザー管理</button>
     <button class="adm-nav-btn" data-tab="reports">🚨 通報管理</button>
     <button class="adm-nav-btn" data-tab="stats">📊 統計</button>
@@ -450,10 +451,26 @@
           <input type="text" id="new-board-emoji" placeholder="絵文字 (例: 🎯)" style="max-width:90px;flex:none">
           <input type="text" id="new-board-name" placeholder="板名">
           <input type="text" id="new-board-slug" placeholder="スラッグ (英小文字)">
+          <select id="new-board-category"><option value="">カテゴリなし</option></select>
           <button class="btn btn-accent" id="new-board-btn">追加</button>
         </div>
       </div>
       <div id="boards-table-wrap">
+        <div class="adm-loading">読み込み中…</div>
+      </div>
+    </section>
+
+    <!-- カテゴリ管理 -->
+    <section class="adm-section" id="tab-categories">
+      <div class="adm-section-title">🗂 カテゴリ管理</div>
+      <div class="adm-card">
+        <h3>カテゴリを追加</h3>
+        <div class="form-row">
+          <input type="text" id="new-cat-name" placeholder="カテゴリ名">
+          <button class="btn btn-accent" id="new-cat-btn">追加</button>
+        </div>
+      </div>
+      <div id="categories-table-wrap">
         <div class="adm-loading">読み込み中…</div>
       </div>
     </section>

@@ -3,12 +3,6 @@
  *
  * 依存: supabase-js@2 (CDN)
  * 初期化: window._boardInit() を呼ぶと板一覧を表示
- *
- * 編集ポイント:
- *   - SUPABASE_URL / SUPABASE_KEY: 接続情報
- *   - renderPost():    投稿のHTML生成
- *   - processBody():   本文パース（アンカー・画像・URL）
- *   - formatDate():    日時フォーマット
  */
 
 // ── 接続情報 ─────────────────────────────────────────────
@@ -16,7 +10,7 @@ const SUPABASE_URL = 'https://pqqrfzofzxiuzvxdrcai.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_t1AfJtM9h_gYkxg9QL3GXg_-CVV0jaT';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── 匿名ID（24hリセットはサーバー側で管理） ──────────────
+// ── 匿名ID ────────────────────────────────────────────────
 let myAnonId = localStorage.getItem('kayou_anon_id');
 if (!myAnonId) {
   myAnonId = Math.random().toString(36).slice(2, 10).toUpperCase();
@@ -24,12 +18,14 @@ if (!myAnonId) {
 }
 
 // ── アプリ状態 ────────────────────────────────────────────
-let view = 'boards';   // 'boards' | 'threads' | 'posts'
+let view = 'boards';
 let currentBoard  = null;
 let currentThread = null;
 let realtimeChannel = null;
-let posts  = [];
-let boards = [];
+let posts      = [];
+let boards     = [];
+let categories = [];
+let activityMap = {}; // boardId → 最新スレッドcreated_at
 
 // ── DOM参照 ───────────────────────────────────────────────
 const bdMain       = document.getElementById('bd-main');
@@ -44,6 +40,7 @@ const bdModal      = document.getElementById('bd-modal');
 const bdPopup      = document.getElementById('bd-anchor-popup');
 const bdTextarea   = document.getElementById('bd-textarea');
 const bdSendBtn    = document.getElementById('bd-send-btn');
+const bdLegalModal = document.getElementById('bd-legal-modal');
 
 // ── サイドバー開閉 ────────────────────────────────────────
 document.getElementById('bd-hamburger').addEventListener('click', () => {
@@ -57,17 +54,96 @@ function closeSidebar() {
   bdOverlay.classList.remove('open');
 }
 
-// サイドバー内 板ナビ再描画
+// ── カテゴリ折りたたみ状態 ───────────────────────────────
+const CAT_COLLAPSE_KEY = 'kayou_cat_collapsed';
+function getCollapseState() {
+  try { return JSON.parse(localStorage.getItem(CAT_COLLAPSE_KEY) || '{}'); } catch { return {}; }
+}
+function saveCollapseState(state) {
+  localStorage.setItem(CAT_COLLAPSE_KEY, JSON.stringify(state));
+}
+
+// ── 未読バッジ ────────────────────────────────────────────
+function markBoardRead(boardId) {
+  localStorage.setItem('lastRead_' + boardId, new Date().toISOString());
+}
+function hasUnread(boardId) {
+  const lastRead = localStorage.getItem('lastRead_' + boardId);
+  const activity = activityMap[boardId];
+  return activity && (!lastRead || activity > lastRead);
+}
+
+// ── サイドバー板ナビ描画（Discord 2層構造） ──────────────
 function renderBoardsNav() {
-  bdBoardsNav.innerHTML = boards.map(b => {
-    const active = currentBoard && currentBoard.id === b.id ? 'active' : '';
+  const collapsed = getCollapseState();
+
+  // カテゴリごとに板をグルーピング
+  const catBoards = {};
+  const uncategorized = [];
+  for (const b of boards) {
+    if (b.category_id) {
+      if (!catBoards[b.category_id]) catBoards[b.category_id] = [];
+      catBoards[b.category_id].push(b);
+    } else {
+      uncategorized.push(b);
+    }
+  }
+
+  function boardBtnHtml(b) {
+    const active   = currentBoard?.id === b.id ? 'active' : '';
+    const unread   = hasUnread(b.id) ? '<span class="bd-unread">●</span>' : '';
     return `<button class="bd-board-btn ${active}" data-id="${b.id}">
       <span class="bd-emoji">${escHtml(b.emoji || '📋')}</span>
       <span class="bd-bname">${escHtml(b.name)}</span>
-      <span class="bd-indicator"></span>
+      ${unread}
     </button>`;
-  }).join('');
+  }
 
+  let html = '';
+
+  // カテゴリあり
+  for (const cat of categories) {
+    const bList = catBoards[cat.id] || [];
+    const isCollapsed = !!collapsed[cat.id];
+    html += `<div class="bd-category">
+      <button class="bd-cat-hdr" data-cat-id="${cat.id}">
+        <span class="bd-cat-arrow${isCollapsed ? ' collapsed' : ''}">▼</span>
+        <span class="bd-cat-name">${escHtml(cat.name)}</span>
+      </button>
+      <div class="bd-cat-boards${isCollapsed ? ' hidden' : ''}">
+        ${bList.map(boardBtnHtml).join('')}
+      </div>
+    </div>`;
+  }
+
+  // 未分類
+  if (uncategorized.length) {
+    const isCollapsed = !!collapsed['__uncategorized__'];
+    html += `<div class="bd-category">
+      <button class="bd-cat-hdr" data-cat-id="__uncategorized__">
+        <span class="bd-cat-arrow${isCollapsed ? ' collapsed' : ''}">▼</span>
+        <span class="bd-cat-name">その他</span>
+      </button>
+      <div class="bd-cat-boards${isCollapsed ? ' hidden' : ''}">
+        ${uncategorized.map(boardBtnHtml).join('')}
+      </div>
+    </div>`;
+  }
+
+  bdBoardsNav.innerHTML = html;
+
+  // カテゴリ折りたたみ
+  bdBoardsNav.querySelectorAll('.bd-cat-hdr').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const catId = btn.dataset.catId;
+      const state = getCollapseState();
+      state[catId] = !state[catId];
+      saveCollapseState(state);
+      renderBoardsNav();
+    });
+  });
+
+  // 板ボタン
   bdBoardsNav.querySelectorAll('.bd-board-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const board = boards.find(b => String(b.id) === btn.dataset.id);
@@ -80,24 +156,41 @@ function renderBoardsNav() {
 async function showBoards() {
   view = 'boards'; currentBoard = null; currentThread = null;
   unsubscribe();
-  bdInputBar.style.display = 'none';
-  bdBackBtn.style.display  = 'none';
+  bdInputBar.style.display   = 'none';
+  bdBackBtn.style.display    = 'none';
   bdFullBanner.style.display = 'none';
   bdTitle.textContent = '華耀東夷堂';
   bdMain.innerHTML = '<div class="bd-loading">読み込み中…</div>';
 
-  const { data, error } = await sb.from('boards').select('*').order('created_at');
-  if (error) { bdMain.innerHTML = `<div class="bd-empty">エラー: ${escHtml(error.message)}</div>`; return; }
-  if (!data.length) { bdMain.innerHTML = '<div class="bd-empty">板がありません</div>'; return; }
+  const [boardsRes, catsRes, actRes] = await Promise.all([
+    sb.from('boards').select('*').order('sort_order').order('created_at'),
+    sb.from('categories').select('*').order('sort_order'),
+    sb.from('threads').select('board_id, created_at').order('created_at', { ascending: false }).limit(300),
+  ]);
 
-  boards = data;
+  if (boardsRes.error) {
+    bdMain.innerHTML = `<div class="bd-empty">エラー: ${escHtml(boardsRes.error.message)}</div>`;
+    return;
+  }
+
+  boards     = boardsRes.data || [];
+  categories = catsRes.data   || [];
+
+  // 板ごとの最新スレッド日時マップを構築
+  activityMap = {};
+  for (const t of (actRes.data || [])) {
+    if (!activityMap[t.board_id]) activityMap[t.board_id] = t.created_at;
+  }
+
   renderBoardsNav();
 
-  bdMain.innerHTML = data.map((b, i) => `
+  if (!boards.length) { bdMain.innerHTML = '<div class="bd-empty">板がありません</div>'; return; }
+
+  bdMain.innerHTML = boards.map((b, i) => `
     <div class="bd-thread-item" data-bid="${b.id}">
       <div class="bd-thread-title">${escHtml(b.emoji || '📋')} ${escHtml(b.name)}</div>
     </div>
-    ${i < data.length - 1 ? '<div class="bd-thread-sep"></div>' : ''}
+    ${i < boards.length - 1 ? '<div class="bd-thread-sep"></div>' : ''}
   `).join('');
 
   bdMain.querySelectorAll('.bd-thread-item[data-bid]').forEach(el => {
@@ -117,6 +210,9 @@ async function showThreads(board) {
   bdBackBtn.style.display    = 'inline-block';
   bdTitle.textContent        = `${board.emoji || ''} ${board.name}`;
   bdMain.innerHTML = '<div class="bd-loading">読み込み中…</div>';
+
+  // 既読マーク & バッジ更新
+  markBoardRead(board.id);
   renderBoardsNav();
 
   const { data, error } = await sb
@@ -127,7 +223,6 @@ async function showThreads(board) {
 
   if (error) { bdMain.innerHTML = `<div class="bd-empty">エラー: ${escHtml(error.message)}</div>`; return; }
 
-  // ※ スレッド作成ボタンは管理ページ専用のため、ここには表示しない
   if (!data.length) {
     bdMain.innerHTML = '<div class="bd-empty">スレッドがありません</div>';
     return;
@@ -218,9 +313,8 @@ function subscribeToThread(threadId) {
       const sep = document.createElement('div');
       sep.className = 'bd-thread-sep';
 
-      // el.firstChild移動後にelが空になるバグを修正: postElで参照を保持
       const wrapper = document.createElement('div');
-      wrapper.innerHTML = renderPost(p, 0); // i=0でseparator prefixを抑制（外側のsepで管理）
+      wrapper.innerHTML = renderPost(p, 0);
       const postEl = wrapper.firstChild;
       bdMain.appendChild(sep);
       bdMain.appendChild(postEl);
@@ -231,8 +325,8 @@ function subscribeToThread(threadId) {
 
       currentThread.post_count = (currentThread.post_count || 0) + 1;
       if (currentThread.post_count >= 1000) {
-        currentThread.is_active  = false;
-        bdInputBar.style.display = 'none';
+        currentThread.is_active    = false;
+        bdInputBar.style.display   = 'none';
         bdFullBanner.style.display = 'block';
       }
       bdMain.scrollTop = bdMain.scrollHeight;
@@ -283,7 +377,7 @@ bdTextarea.addEventListener('input', () => {
   bdTextarea.style.height = Math.min(bdTextarea.scrollHeight, 120) + 'px';
 });
 
-// ── スレッド作成モーダル（管理ページ用、一般画面からは非表示） ─
+// ── スレッド作成モーダル（管理ページ用） ─────────────────
 function openModal() {
   bdModal.classList.add('open');
   setTimeout(() => document.getElementById('bd-thread-title').focus(), 50);
@@ -313,9 +407,50 @@ document.getElementById('bd-modal-submit').addEventListener('click', async () =>
 
 // ── 戻るボタン ────────────────────────────────────────────
 bdBackBtn.addEventListener('click', () => {
-  if (view === 'posts')   showThreads(currentBoard);
+  if (view === 'posts')        showThreads(currentBoard);
   else if (view === 'threads') showBoards();
 });
+
+// ── 利用規約 / プライバシーポリシー モーダル ─────────────
+const PRIVACY_HTML = `<h2>プライバシーポリシー</h2>
+<p>本サイト（華耀東夷堂）は、以下の情報を収集・利用します。</p>
+<h3>収集する情報</h3>
+<ul>
+  <li>・投稿内容（テキスト）</li>
+  <li>・接続元IPアドレス（サーバーログ）</li>
+  <li>・匿名ID（ブラウザのlocalStorageに保存、24時間でリセット）</li>
+  <li>・Google Analyticsによるアクセス解析情報（Cookie使用）</li>
+</ul>
+<h3>利用目的</h3>
+<ul>
+  <li>・サービスの提供・運営</li>
+  <li>・不正利用の防止・対処</li>
+  <li>・サービス改善のための統計分析</li>
+</ul>
+<h3>第三者提供</h3>
+<p>法令に基づく場合を除き、収集した情報を第三者に提供することはありません。</p>
+<h3>Google Analytics</h3>
+<p>アクセス解析のためにGoogle Analyticsを使用しています。収集データはGoogleのプライバシーポリシーに従って管理されます。</p>
+<p class="footer-note">施行：2026年04月28日</p>`;
+
+document.getElementById('btn-show-terms').addEventListener('click', () => {
+  openLegalModal('利用規約', document.getElementById('terms-normal').innerHTML);
+});
+document.getElementById('btn-show-privacy').addEventListener('click', () => {
+  openLegalModal('プライバシーポリシー', PRIVACY_HTML);
+});
+
+function openLegalModal(title, html) {
+  document.getElementById('bd-legal-modal-title').textContent = title;
+  document.getElementById('bd-legal-modal-body').innerHTML = html;
+  bdLegalModal.classList.add('open');
+  document.getElementById('bd-legal-modal-body').scrollTop = 0;
+}
+function closeLegalModal() {
+  bdLegalModal.classList.remove('open');
+}
+document.getElementById('bd-legal-modal-close').addEventListener('click', closeLegalModal);
+bdLegalModal.addEventListener('click', e => { if (e.target === bdLegalModal) closeLegalModal(); });
 
 // ── >>アンカー引用 ────────────────────────────────────────
 function quotePost(num) {
@@ -357,15 +492,12 @@ bdMain.addEventListener('scroll', hideAnchorPopup);
 // ── 本文パース ────────────────────────────────────────────
 function processBody(body) {
   let s = escHtml(body);
-  // >>N アンカー
   s = s.replace(/&gt;&gt;(\d+)/g, (_, n) =>
     `<a class="anchor" href="#post-${n}" onmouseenter="showAnchorPopup(event,${n})" onmouseleave="hideAnchorPopup()" onclick="event.preventDefault();showAnchorPopup(event,${n})">&gt;&gt;${n}</a>`);
-  // pbs.twimg.com 画像を inline 表示
   s = s.replace(/(https?:\/\/pbs\.twimg\.com\/media\/[A-Za-z0-9_\-?=&%.]+)/g, url => {
     const u = url.replace(/&amp;/g, '&');
     return `<a href="${u}" target="_blank" rel="noopener"><img src="${u}" class="inline-img" loading="lazy"></a>`;
   });
-  // その他 URL
   s = s.replace(/(https?:\/\/(?!pbs\.twimg\.com\/media\/)[^\s<&]+)/g, url =>
     `<a href="${url}" target="_blank" rel="noopener">${url}</a>`);
   return s.replace(/\n/g, '<br>');
@@ -386,5 +518,5 @@ function formatDate(iso) {
   return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-// ── エントリーポイント（flow.js から呼ばれる） ────────────
+// ── エントリーポイント ────────────────────────────────────
 window._boardInit = function() { showBoards(); };

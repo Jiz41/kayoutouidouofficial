@@ -211,7 +211,92 @@ body {
 .bd-board-btn .bd-indicator   { margin-left: auto; width: 3px; height: 16px; background: #c8a060; border-radius: 2px; flex-shrink: 0; display: none; }
 .bd-board-btn.active .bd-indicator { display: block; }
 
-#bd-sidebar-ftr { padding: 12px 16px; border-top: 1px solid #1a2236; font-size: 10px; color: #5a6278; flex-shrink: 0; }
+/* ── カテゴリ構造（Discord風2層） ── */
+.bd-category { margin-bottom: 2px; }
+
+.bd-cat-hdr {
+  display: flex; align-items: center; gap: 6px;
+  width: 100%; padding: 6px 8px 4px;
+  background: none; border: none; cursor: pointer;
+  text-align: left;
+}
+.bd-cat-hdr:hover .bd-cat-name { color: #9aa0b0; }
+
+.bd-cat-arrow {
+  font-size: 8px; color: #5a6278;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+.bd-cat-arrow.collapsed { transform: rotate(-90deg); }
+
+.bd-cat-name {
+  font-size: 10px; font-weight: 700; color: #5a6278;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  transition: color 0.15s;
+}
+
+.bd-cat-boards { overflow: hidden; }
+.bd-cat-boards.hidden { display: none; }
+
+/* 未読バッジ */
+.bd-unread {
+  margin-left: auto; font-size: 8px; color: #c8a060;
+  flex-shrink: 0;
+}
+
+/* サイドバーフッター */
+#bd-sidebar-ftr {
+  padding: 10px 16px 16px; border-top: 1px solid #1a2236;
+  flex-shrink: 0;
+}
+.bd-ftr-desc { font-size: 10px; color: #5a6278; margin-bottom: 8px; }
+.bd-legal-links { display: flex; align-items: center; gap: 8px; }
+.bd-legal-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 10px; color: #3a4058;
+  font-family: 'Noto Sans JP', sans-serif;
+  letter-spacing: 0.03em; padding: 0;
+  transition: color 0.2s;
+}
+.bd-legal-btn:hover { color: #c8a060; }
+.bd-legal-sep { font-size: 10px; color: #3a4058; }
+
+/* ── 法的モーダル ── */
+#bd-legal-modal {
+  display: none; position: absolute; inset: 0;
+  background: rgba(0,0,0,0.8); z-index: 200;
+  align-items: flex-end; justify-content: center;
+  padding: 0;
+}
+#bd-legal-modal.open { display: flex; }
+#bd-legal-modal-box {
+  background: #0d1220; border-top: 1px solid #c8a060;
+  border-radius: 12px 12px 0 0;
+  width: 100%; max-height: 75%;
+  display: flex; flex-direction: column;
+}
+#bd-legal-modal-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 12px; border-bottom: 1px solid #1a2236;
+  flex-shrink: 0;
+}
+#bd-legal-modal-title { font-size: 14px; font-weight: 700; color: #c8a060; }
+#bd-legal-modal-close {
+  background: none; border: none; color: #5a6278;
+  font-size: 16px; cursor: pointer; padding: 2px 6px;
+  transition: color 0.15s;
+}
+#bd-legal-modal-close:hover { color: #f0ece4; }
+#bd-legal-modal-body {
+  flex: 1; overflow-y: auto; padding: 16px 18px 24px;
+  font-size: 12px; line-height: 2; color: #9aa0b0;
+}
+#bd-legal-modal-body h2 { font-size: 11px; font-weight: 500; color: #c8a060; letter-spacing: 0.1em; margin: 20px 0 6px; }
+#bd-legal-modal-body h3 { font-size: 10px; font-weight: 500; color: #8a9090; letter-spacing: 0.08em; margin: 14px 0 4px; }
+#bd-legal-modal-body p  { margin-bottom: 6px; }
+#bd-legal-modal-body ul { padding-left: 0; list-style: none; }
+#bd-legal-modal-body ul li { color: #7a8090; }
+#bd-legal-modal-body .footer-note { margin-top: 24px; font-size: 10px; color: #3a4058; }
 
 /* ── ヘッダー ── */
 #bd-header {

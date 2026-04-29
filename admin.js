@@ -9,8 +9,9 @@ const ADMIN_ANON_ID = 'SYSTEM';
 const PAGE_SIZE = 30;
 
 // ── 状態 ─────────────────────────────────────────────────────
-let currentUser = null;
-let boardsCache = [];
+let currentUser    = null;
+let boardsCache    = [];
+let categoriesCache = [];
 let postPage   = 0;
 let threadPage = 0;
 
@@ -100,12 +101,14 @@ document.querySelectorAll('.adm-nav-btn').forEach(btn => {
     btn.classList.add('active');
     const tab = btn.dataset.tab;
     document.getElementById('tab-' + tab).classList.add('active');
-    if (tab === 'stats') loadStats();
+    if (tab === 'stats')      loadStats();
+    if (tab === 'categories') loadCategories();
   });
 });
 
 // ── 初期化 ────────────────────────────────────────────────────
 async function initAdmin() {
+  await loadCategories();
   await loadBoards();
   loadPosts();
   loadThreads();
@@ -131,6 +134,11 @@ function populateBoardSelects() {
   const newOpts = `<option value="">板を選択</option>` +
     boardsCache.map(b => `<option value="${esc(b.id)}">${esc(b.emoji)} ${esc(b.name)}</option>`).join('');
   document.getElementById('new-thread-board').innerHTML = newOpts;
+
+  // 板作成フォームのカテゴリ選択
+  const catOpts = `<option value="">カテゴリなし</option>` +
+    categoriesCache.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  document.getElementById('new-board-category').innerHTML = catOpts;
 }
 
 // ── 投稿管理 ─────────────────────────────────────────────────
@@ -309,18 +317,20 @@ async function deleteThread(id) {
 document.getElementById('new-board-btn').addEventListener('click', createBoard);
 
 async function createBoard() {
-  const emoji = document.getElementById('new-board-emoji').value.trim() || '📋';
-  const name  = document.getElementById('new-board-name').value.trim();
-  const slug  = document.getElementById('new-board-slug').value.trim();
+  const emoji      = document.getElementById('new-board-emoji').value.trim() || '📋';
+  const name       = document.getElementById('new-board-name').value.trim();
+  const slug       = document.getElementById('new-board-slug').value.trim();
+  const categoryId = document.getElementById('new-board-category').value || null;
   if (!name || !slug) { alert('板名とスラッグを入力してください'); return; }
   if (!/^[a-z0-9_-]+$/.test(slug)) { alert('スラッグは英小文字・数字・ハイフン・アンダースコアのみ使用可能です'); return; }
 
   const maxOrder = boardsCache.reduce((m, b) => Math.max(m, b.sort_order || 0), 0);
-  const { error } = await sb.from('boards').insert({ emoji, name, slug, sort_order: maxOrder + 1 });
+  const { error } = await sb.from('boards').insert({ emoji, name, slug, category_id: categoryId, sort_order: maxOrder + 1 });
   if (error) { alert('追加失敗: ' + error.message); return; }
-  document.getElementById('new-board-emoji').value = '';
-  document.getElementById('new-board-name').value  = '';
-  document.getElementById('new-board-slug').value  = '';
+  document.getElementById('new-board-emoji').value    = '';
+  document.getElementById('new-board-name').value     = '';
+  document.getElementById('new-board-slug').value     = '';
+  document.getElementById('new-board-category').value = '';
   await loadBoards();
 }
 
@@ -328,23 +338,25 @@ function renderBoardsTable() {
   const wrap = document.getElementById('boards-table-wrap');
   if (!boardsCache.length) { wrap.innerHTML = '<div class="adm-empty">板がありません</div>'; return; }
 
+  const catMap = Object.fromEntries(categoriesCache.map(c => [c.id, c.name]));
+
   wrap.innerHTML = `<div class="adm-table-wrap"><table>
     <thead><tr>
-      <th>順</th><th>絵文字</th><th>板名</th><th>スラッグ</th><th>作成日時</th><th>操作</th>
+      <th>順</th><th>絵文字</th><th>板名</th><th>カテゴリ</th><th>スラッグ</th><th>操作</th>
     </tr></thead>
     <tbody>
       ${boardsCache.map((b, i) => `<tr>
         <td class="td-mono">${b.sort_order ?? i}</td>
         <td style="font-size:20px">${esc(b.emoji)}</td>
         <td>${esc(b.name)}</td>
+        <td>${b.category_id ? esc(catMap[b.category_id] || '-') : '<span style="color:var(--muted)">未分類</span>'}</td>
         <td class="td-mono">${esc(b.slug)}</td>
-        <td class="td-mono">${fmtDate(b.created_at)}</td>
         <td><div class="td-actions">
           <div class="order-btns">
             <button class="btn btn-ghost" data-order-up="${i}" style="padding:4px 8px" ${i===0?'disabled':''}>↑</button>
             <button class="btn btn-ghost" data-order-dn="${i}" style="padding:4px 8px" ${i===boardsCache.length-1?'disabled':''}>↓</button>
           </div>
-          <button class="btn btn-ghost" data-edit-board="${esc(b.id)}" data-emoji="${esc(b.emoji)}" data-name="${esc(b.name)}" style="font-size:11px">編集</button>
+          <button class="btn btn-ghost" data-edit-board="${esc(b.id)}" data-emoji="${esc(b.emoji)}" data-name="${esc(b.name)}" data-cat="${esc(b.category_id||'')}" style="font-size:11px">編集</button>
           <button class="btn btn-danger" data-del-board="${esc(b.id)}" style="font-size:11px">削除</button>
         </div></td>
       </tr>`).join('')}
@@ -358,7 +370,7 @@ function renderBoardsTable() {
     btn.addEventListener('click', () => moveBoardOrder(parseInt(btn.dataset.orderDn), 1));
   });
   wrap.querySelectorAll('[data-edit-board]').forEach(btn => {
-    btn.addEventListener('click', () => editBoard(btn.dataset.editBoard, btn.dataset.emoji, btn.dataset.name));
+    btn.addEventListener('click', () => editBoard(btn.dataset.editBoard, btn.dataset.emoji, btn.dataset.name, btn.dataset.cat));
   });
   wrap.querySelectorAll('[data-del-board]').forEach(btn => {
     btn.addEventListener('click', () => deleteBoard(btn.dataset.delBoard));
@@ -377,12 +389,26 @@ async function moveBoardOrder(idx, dir) {
   await loadBoards();
 }
 
-async function editBoard(id, currentEmoji, currentName) {
+async function editBoard(id, currentEmoji, currentName, currentCatId) {
   const emoji = prompt('絵文字を入力', currentEmoji);
   if (emoji === null) return;
   const name = prompt('板名を入力', currentName);
-  if (!name || name === null) return;
-  const { error } = await sb.from('boards').update({ emoji: emoji.trim() || currentEmoji, name: name.trim() }).eq('id', id);
+  if (!name) return;
+
+  const catNames = categoriesCache.map((c, i) => `${i + 1}: ${c.name}`).join('\n');
+  const catPrompt = `カテゴリ番号を入力（0=未分類）:\n0: 未分類\n${catNames}`;
+  const catInput = prompt(catPrompt, currentCatId ? String(categoriesCache.findIndex(c => c.id === currentCatId) + 1) : '0');
+  if (catInput === null) return;
+  const catIdx = parseInt(catInput);
+  const newCatId = (catIdx > 0 && catIdx <= categoriesCache.length)
+    ? categoriesCache[catIdx - 1].id
+    : null;
+
+  const { error } = await sb.from('boards').update({
+    emoji:       emoji.trim() || currentEmoji,
+    name:        name.trim(),
+    category_id: newCatId,
+  }).eq('id', id);
   if (error) { alert('編集失敗: ' + error.message); return; }
   await loadBoards();
 }
@@ -391,6 +417,101 @@ async function deleteBoard(id) {
   if (!confirm('この板とすべてのスレッド・投稿を削除しますか？この操作は取り消せません。')) return;
   const { error } = await sb.from('boards').delete().eq('id', id);
   if (error) { alert('削除失敗: ' + error.message); return; }
+  await loadBoards();
+}
+
+// ── カテゴリ管理 ─────────────────────────────────────────────
+document.getElementById('new-cat-btn').addEventListener('click', createCategory);
+
+async function loadCategories() {
+  const { data } = await sb.from('categories').select('*').order('sort_order').order('created_at');
+  categoriesCache = data || [];
+  renderCategoriesTable();
+}
+
+async function createCategory() {
+  const name = document.getElementById('new-cat-name').value.trim();
+  if (!name) { alert('カテゴリ名を入力してください'); return; }
+  const maxOrder = categoriesCache.reduce((m, c) => Math.max(m, c.sort_order || 0), 0);
+  const { error } = await sb.from('categories').insert({ name, sort_order: maxOrder + 1 });
+  if (error) { alert('追加失敗: ' + error.message); return; }
+  document.getElementById('new-cat-name').value = '';
+  await loadCategories();
+  populateBoardSelects();
+}
+
+function renderCategoriesTable() {
+  const wrap = document.getElementById('categories-table-wrap');
+  if (!categoriesCache.length) { wrap.innerHTML = '<div class="adm-empty">カテゴリがありません</div>'; return; }
+
+  wrap.innerHTML = `<div class="adm-table-wrap"><table>
+    <thead><tr>
+      <th>順</th><th>カテゴリ名</th><th>板数</th><th>作成日時</th><th>操作</th>
+    </tr></thead>
+    <tbody>
+      ${categoriesCache.map((c, i) => {
+        const boardCount = boardsCache.filter(b => b.category_id === c.id).length;
+        return `<tr>
+          <td class="td-mono">${c.sort_order ?? i}</td>
+          <td>${esc(c.name)}</td>
+          <td class="td-mono">${boardCount}</td>
+          <td class="td-mono">${fmtDate(c.created_at)}</td>
+          <td><div class="td-actions">
+            <div class="order-btns">
+              <button class="btn btn-ghost" data-cat-up="${i}" style="padding:4px 8px" ${i===0?'disabled':''}>↑</button>
+              <button class="btn btn-ghost" data-cat-dn="${i}" style="padding:4px 8px" ${i===categoriesCache.length-1?'disabled':''}>↓</button>
+            </div>
+            <button class="btn btn-ghost" data-edit-cat="${esc(c.id)}" data-name="${esc(c.name)}" style="font-size:11px">編集</button>
+            <button class="btn btn-danger" data-del-cat="${esc(c.id)}" data-count="${boardCount}" style="font-size:11px">削除</button>
+          </div></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div>`;
+
+  wrap.querySelectorAll('[data-cat-up]').forEach(btn => {
+    btn.addEventListener('click', () => moveCategoryOrder(parseInt(btn.dataset.catUp), -1));
+  });
+  wrap.querySelectorAll('[data-cat-dn]').forEach(btn => {
+    btn.addEventListener('click', () => moveCategoryOrder(parseInt(btn.dataset.catDn), 1));
+  });
+  wrap.querySelectorAll('[data-edit-cat]').forEach(btn => {
+    btn.addEventListener('click', () => editCategory(btn.dataset.editCat, btn.dataset.name));
+  });
+  wrap.querySelectorAll('[data-del-cat]').forEach(btn => {
+    btn.addEventListener('click', () => deleteCategory(btn.dataset.delCat, parseInt(btn.dataset.count)));
+  });
+}
+
+async function editCategory(id, currentName) {
+  const name = prompt('カテゴリ名を入力', currentName);
+  if (!name || name === currentName) return;
+  const { error } = await sb.from('categories').update({ name: name.trim() }).eq('id', id);
+  if (error) { alert('編集失敗: ' + error.message); return; }
+  await loadCategories();
+  populateBoardSelects();
+}
+
+async function moveCategoryOrder(idx, dir) {
+  const a = categoriesCache[idx];
+  const b = categoriesCache[idx + dir];
+  if (!a || !b) return;
+  const [oa, ob] = [a.sort_order ?? idx, b.sort_order ?? (idx + dir)];
+  await Promise.all([
+    sb.from('categories').update({ sort_order: ob }).eq('id', a.id),
+    sb.from('categories').update({ sort_order: oa }).eq('id', b.id),
+  ]);
+  await loadCategories();
+}
+
+async function deleteCategory(id, boardCount) {
+  const msg = boardCount > 0
+    ? `このカテゴリを削除すると、紐付いている${boardCount}枚の板が「未分類」になります。続けますか？`
+    : 'このカテゴリを削除しますか？';
+  if (!confirm(msg)) return;
+  const { error } = await sb.from('categories').delete().eq('id', id);
+  if (error) { alert('削除失敗: ' + error.message); return; }
+  await loadCategories();
   await loadBoards();
 }
 
