@@ -359,7 +359,7 @@ function processBody(body) {
   let s = escHtml(body);
   // >>N アンカー
   s = s.replace(/&gt;&gt;(\d+)/g, (_, n) =>
-    `<a class="anchor" href="#post-${n}" onmouseenter="showAnchorPopup(event,${n})" onmouseleave="hideAnchorPopup()" onclick="event.preventDefault();scrollToPost(${n})">&gt;&gt;${n}</a>`);
+    `<a class="anchor" href="#post-${n}" onmouseenter="showAnchorPopup(event,${n})" onmouseleave="hideAnchorPopup()" onclick="event.preventDefault();showAnchorPopup(event,${n})">&gt;&gt;${n}</a>`);
   // pbs.twimg.com 画像を inline 表示
   s = s.replace(/(https?:\/\/pbs\.twimg\.com\/media\/[A-Za-z0-9_\-?=&%.]+)/g, url => {
     const u = url.replace(/&amp;/g, '&');
