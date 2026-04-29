@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /admin.html
+Disallow: /admin.js
+Disallow: /admin_setup.sql
