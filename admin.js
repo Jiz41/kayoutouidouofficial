@@ -378,14 +378,18 @@ function renderBoardsTable() {
 }
 
 async function moveBoardOrder(idx, dir) {
-  const a = boardsCache[idx];
-  const b = boardsCache[idx + dir];
-  if (!a || !b) return;
-  const [oa, ob] = [a.sort_order ?? idx, b.sort_order ?? (idx + dir)];
-  await Promise.all([
-    sb.from('boards').update({ sort_order: ob }).eq('id', a.id),
-    sb.from('boards').update({ sort_order: oa }).eq('id', b.id),
-  ]);
+  const target = idx + dir;
+  if (target < 0 || target >= boardsCache.length) return;
+
+  // 入れ替え後の新順序を配列で計算
+  const reordered = [...boardsCache];
+  const [moved] = reordered.splice(idx, 1);
+  reordered.splice(target, 0, moved);
+
+  // 全件に 1-indexed の連番を振り直して一括 UPDATE（重複・欠番を解消）
+  await Promise.all(
+    reordered.map((b, i) => sb.from('boards').update({ sort_order: i + 1 }).eq('id', b.id))
+  );
   await loadBoards();
 }
 
@@ -493,14 +497,16 @@ async function editCategory(id, currentName) {
 }
 
 async function moveCategoryOrder(idx, dir) {
-  const a = categoriesCache[idx];
-  const b = categoriesCache[idx + dir];
-  if (!a || !b) return;
-  const [oa, ob] = [a.sort_order ?? idx, b.sort_order ?? (idx + dir)];
-  await Promise.all([
-    sb.from('categories').update({ sort_order: ob }).eq('id', a.id),
-    sb.from('categories').update({ sort_order: oa }).eq('id', b.id),
-  ]);
+  const target = idx + dir;
+  if (target < 0 || target >= categoriesCache.length) return;
+
+  const reordered = [...categoriesCache];
+  const [moved] = reordered.splice(idx, 1);
+  reordered.splice(target, 0, moved);
+
+  await Promise.all(
+    reordered.map((c, i) => sb.from('categories').update({ sort_order: i + 1 }).eq('id', c.id))
+  );
   await loadCategories();
 }
 
