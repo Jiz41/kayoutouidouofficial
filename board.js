@@ -25,7 +25,8 @@ let realtimeChannel = null;
 let posts      = [];
 let boards     = [];
 let categories = [];
-let activityMap = {}; // boardId → 最新スレッドcreated_at
+let activityMap   = {}; // boardId → 最新スレッドcreated_at
+let pendingImages = []; // { file, objectUrl }
 
 // ── DOM参照 ───────────────────────────────────────────────
 const bdMain       = document.getElementById('bd-main');
@@ -41,6 +42,10 @@ const bdPopup      = document.getElementById('bd-anchor-popup');
 const bdTextarea   = document.getElementById('bd-textarea');
 const bdSendBtn    = document.getElementById('bd-send-btn');
 const bdLegalModal = document.getElementById('bd-legal-modal');
+const bdAttachBtn  = document.getElementById('bd-attach-btn');
+const bdFileInput  = document.getElementById('bd-file-input');
+const bdImgPreview = document.getElementById('bd-img-preview');
+const bdLightbox   = document.getElementById('bd-lightbox');
 
 // ── サイドバー開閉 ────────────────────────────────────────
 document.getElementById('bd-hamburger').addEventListener('click', () => {
@@ -156,6 +161,7 @@ function renderBoardsNav() {
 async function showBoards() {
   view = 'boards'; currentBoard = null; currentThread = null;
   unsubscribe();
+  clearPendingImages();
   bdInputBar.style.display   = 'none';
   bdBackBtn.style.display    = 'none';
   bdFullBanner.style.display = 'none';
@@ -205,6 +211,7 @@ async function showBoards() {
 async function showThreads(board) {
   view = 'threads'; currentBoard = board; currentThread = null;
   unsubscribe();
+  clearPendingImages();
   bdInputBar.style.display   = 'none';
   bdFullBanner.style.display = 'none';
   bdBackBtn.style.display    = 'inline-block';
@@ -346,20 +353,38 @@ function unsubscribe() {
 // ── 投稿送信 ──────────────────────────────────────────────
 document.getElementById('bd-form').addEventListener('submit', async e => {
   e.preventDefault();
-  const body = bdTextarea.value.trim();
-  if (!body || !currentThread?.is_active) return;
+  const text = bdTextarea.value.trim();
+  if (!text && !pendingImages.length) return;
+  if (!currentThread?.is_active) return;
 
-  bdSendBtn.disabled = true;
+  bdSendBtn.disabled   = true;
+  bdAttachBtn.disabled = true;
+
+  let body = text;
+  try {
+    if (pendingImages.length) {
+      const urls = await uploadImages();
+      body = urls.join('\n') + (text ? '\n' + text : '');
+    }
+  } catch (err) {
+    alert('画像アップロード失敗: ' + err.message);
+    bdSendBtn.disabled   = false;
+    bdAttachBtn.disabled = false;
+    return;
+  }
+
   const { error } = await sb.rpc('insert_post', {
     p_thread_id: currentThread.id,
     p_body:      body,
     p_anon_id:   myAnonId,
   });
-  bdSendBtn.disabled = false;
+  bdSendBtn.disabled   = false;
+  bdAttachBtn.disabled = false;
 
   if (!error) {
     bdTextarea.value = '';
     bdTextarea.style.height = 'auto';
+    clearPendingImages();
   } else {
     alert('投稿失敗: ' + error.message);
   }
@@ -497,12 +522,95 @@ function processBody(body) {
   s = s.replace(/(https?:\/\/[^\s<&]+)/g, raw => {
     const url = raw.replace(/&amp;/g, '&');
     if (/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(url)) {
-      return `<a href="${url}" target="_blank" rel="noopener noreferrer"><img src="${url}" class="inline-img" loading="lazy"></a>`;
+      return `<img src="${url}" class="inline-img" loading="lazy" data-lb="${url}">`;
     }
     return `<a href="${url}" target="_blank" rel="noopener noreferrer">${raw}</a>`;
   });
   return s.replace(/\n/g, '<br>');
 }
+
+// ── 画像添付 ──────────────────────────────────────────────
+const MAX_ATTACH  = 3;
+const MAX_FILE_SZ = 5 * 1024 * 1024; // 5MB
+
+function clearPendingImages() {
+  pendingImages.forEach(p => URL.revokeObjectURL(p.objectUrl));
+  pendingImages = [];
+  renderImgPreview();
+}
+
+function renderImgPreview() {
+  if (!pendingImages.length) {
+    bdImgPreview.innerHTML    = '';
+    bdImgPreview.style.display = 'none';
+    return;
+  }
+  bdImgPreview.style.display = 'flex';
+  bdImgPreview.innerHTML = pendingImages.map((img, i) =>
+    `<div class="img-prev-item">
+      <img src="${img.objectUrl}">
+      <button type="button" class="img-prev-rm" data-i="${i}">✕</button>
+    </div>`
+  ).join('');
+  bdImgPreview.querySelectorAll('.img-prev-rm').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.i);
+      URL.revokeObjectURL(pendingImages[i].objectUrl);
+      pendingImages.splice(i, 1);
+      renderImgPreview();
+    });
+  });
+}
+
+async function uploadImages() {
+  const urls = [];
+  for (const { file } of pendingImages) {
+    const ext  = (file.name.split('.').pop() || 'jpg').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    const path = `${myAnonId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await sb.storage.from('post-images').upload(path, file, { contentType: file.type, upsert: false });
+    if (error) throw error;
+    const { data } = sb.storage.from('post-images').getPublicUrl(path);
+    urls.push(data.publicUrl);
+  }
+  return urls;
+}
+
+bdAttachBtn.addEventListener('click', () => {
+  if (pendingImages.length >= MAX_ATTACH) { alert(`画像は最大${MAX_ATTACH}枚までです`); return; }
+  bdFileInput.click();
+});
+
+bdFileInput.addEventListener('change', () => {
+  const files = Array.from(bdFileInput.files || []);
+  for (const file of files) {
+    if (pendingImages.length >= MAX_ATTACH) break;
+    if (!file.type.startsWith('image/')) continue;
+    if (file.size > MAX_FILE_SZ) { alert(`${file.name} は5MBを超えています`); continue; }
+    pendingImages.push({ file, objectUrl: URL.createObjectURL(file) });
+  }
+  bdFileInput.value = '';
+  renderImgPreview();
+});
+
+// ── ライトボックス（画像タップ拡大） ─────────────────────
+bdMain.addEventListener('click', e => {
+  const img = e.target.closest('[data-lb]');
+  if (img) openLightbox(img.dataset.lb);
+});
+
+function openLightbox(url) {
+  document.getElementById('bd-lightbox-img').src = url;
+  bdLightbox.classList.add('open');
+}
+function closeLightbox() {
+  bdLightbox.classList.remove('open');
+  setTimeout(() => { document.getElementById('bd-lightbox-img').src = ''; }, 300);
+}
+bdLightbox.addEventListener('click', closeLightbox);
+document.getElementById('bd-lightbox-close').addEventListener('click', e => {
+  e.stopPropagation();
+  closeLightbox();
+});
 
 // ── ユーティリティ ────────────────────────────────────────
 function escHtml(s) {

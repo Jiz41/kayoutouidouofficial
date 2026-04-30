@@ -359,7 +359,7 @@ body {
 .bd-post.system .bd-post-body { color: #ddd6c8; }
 .bd-post-body a       { color: #c8a060; text-decoration: none; }
 .bd-post-body a.anchor{ color: #7ab8e0; }
-.bd-post-body .inline-img { max-width: 100%; max-height: 260px; display: block; margin-top: 6px; border-radius: 3px; }
+/* .inline-img は下部の統合スタイルで定義 */
 
 /* ── 入力バー ── */
 #bd-input-bar {
@@ -410,6 +410,71 @@ body {
 .bd-modal-actions button   { flex: 1; padding: 10px; border-radius: 4px; font-size: 13px; cursor: pointer; border: none; font-family: 'Noto Sans JP', sans-serif; }
 #bd-modal-submit           { background: #c8a060; color: #0f1420; font-weight: 700; }
 #bd-modal-cancel           { background: none; border: 1px solid #3a4058 !important; color: #5a6278; }
+
+/* ── 画像プレビュー（添付前） ── */
+#bd-img-preview {
+  display: none; flex-wrap: wrap; gap: 8px;
+  padding: 8px 14px 0;
+}
+.img-prev-item {
+  position: relative; width: 64px; height: 64px;
+  border-radius: 6px; overflow: hidden;
+  border: 1px solid #3a4058;
+}
+.img-prev-item img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.img-prev-rm {
+  position: absolute; top: 2px; right: 2px;
+  width: 18px; height: 18px;
+  background: rgba(0,0,0,0.7); color: #f0ece4;
+  border: none; border-radius: 50%; font-size: 9px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  line-height: 1; padding: 0;
+}
+
+/* ── 添付ボタン ── */
+#bd-attach-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: opacity .15s;
+}
+#bd-attach-btn:hover   { opacity: .7; }
+#bd-attach-btn:disabled { opacity: .3; cursor: default; }
+
+/* ── 投稿内サムネイル ── */
+.inline-img {
+  max-width: 180px; max-height: 180px;
+  display: block; margin-top: 6px;
+  border-radius: 6px; cursor: zoom-in;
+  object-fit: cover;
+  border: 1px solid #2a3040;
+  transition: opacity .15s;
+}
+.inline-img:hover { opacity: .85; }
+
+/* ── ライトボックス ── */
+#bd-lightbox {
+  display: none; position: absolute; inset: 0;
+  background: rgba(0,0,0,0.92); z-index: 400;
+  align-items: center; justify-content: center;
+}
+#bd-lightbox.open { display: flex; }
+#bd-lightbox-img {
+  max-width: 94%; max-height: 88%;
+  object-fit: contain; border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+#bd-lightbox-close {
+  position: absolute; top: 16px; right: 18px;
+  background: rgba(0,0,0,0.6); border: none;
+  color: #f0ece4; font-size: 18px; width: 36px; height: 36px;
+  border-radius: 50%; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: background .15s;
+}
+#bd-lightbox-close:hover { background: rgba(200,160,96,0.3); }
 
 /* ── アンカーポップアップ ── */
 #bd-anchor-popup {
