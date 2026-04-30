@@ -494,12 +494,13 @@ function processBody(body) {
   let s = escHtml(body);
   s = s.replace(/&gt;&gt;(\d+)/g, (_, n) =>
     `<a class="anchor" href="#post-${n}" onmouseenter="showAnchorPopup(event,${n})" onmouseleave="hideAnchorPopup()" onclick="event.preventDefault();showAnchorPopup(event,${n})">&gt;&gt;${n}</a>`);
-  s = s.replace(/(https?:\/\/pbs\.twimg\.com\/media\/[A-Za-z0-9_\-?=&%.]+)/g, url => {
-    const u = url.replace(/&amp;/g, '&');
-    return `<a href="${u}" target="_blank" rel="noopener"><img src="${u}" class="inline-img" loading="lazy"></a>`;
+  s = s.replace(/(https?:\/\/[^\s<&]+)/g, raw => {
+    const url = raw.replace(/&amp;/g, '&');
+    if (/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(url)) {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer"><img src="${url}" class="inline-img" loading="lazy"></a>`;
+    }
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${raw}</a>`;
   });
-  s = s.replace(/(https?:\/\/(?!pbs\.twimg\.com\/media\/)[^\s<&]+)/g, url =>
-    `<a href="${url}" target="_blank" rel="noopener">${url}</a>`);
   return s.replace(/\n/g, '<br>');
 }
 
