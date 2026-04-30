@@ -562,12 +562,26 @@ function renderImgPreview() {
   });
 }
 
+async function compressImage(file, maxPx = 1200, quality = 0.75) {
+  // GIFはアニメーション保持のため圧縮しない
+  if (file.type === 'image/gif') return file;
+  const bmp    = await createImageBitmap(file);
+  const scale  = Math.min(1, maxPx / Math.max(bmp.width, bmp.height));
+  const canvas = Object.assign(document.createElement('canvas'), {
+    width: Math.round(bmp.width * scale), height: Math.round(bmp.height * scale),
+  });
+  canvas.getContext('2d').drawImage(bmp, 0, 0, canvas.width, canvas.height);
+  bmp.close();
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+}
+
 async function uploadImages() {
   const urls = [];
   for (const { file } of pendingImages) {
-    const ext  = (file.name.split('.').pop() || 'jpg').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    const blob = await compressImage(file);
+    const ext  = blob.type === 'image/gif' ? 'gif' : 'jpg';
     const path = `${myAnonId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error } = await sb.storage.from('post-images').upload(path, file, { contentType: file.type, upsert: false });
+    const { error } = await sb.storage.from('post-images').upload(path, blob, { contentType: blob.type, upsert: false });
     if (error) throw error;
     const { data } = sb.storage.from('post-images').getPublicUrl(path);
     urls.push(data.publicUrl);
