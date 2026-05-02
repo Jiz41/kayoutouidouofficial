@@ -147,18 +147,23 @@ function renderBoardsNav() {
     </div>`;
   }
 
-  // ── ④ 区切り → アプデ/メンテ ───────────────────────────
+  // ── ④ 区切り → アプデ/メンテ → 区切り → リンク ──────────
   html += SEP;
   html += `<button class="bd-board-btn${view === 'announcements' ? ' active' : ''}" id="bd-ann-btn">
     <span class="bd-emoji">🔧</span><span class="bd-bname">アプデ/メンテ情報</span>
+  </button>`;
+  html += SEP;
+  html += `<button class="bd-board-btn${view === 'links' ? ' active' : ''}" id="bd-links-btn">
+    <span class="bd-emoji">🔗</span><span class="bd-bname">リンク</span>
   </button>`;
 
   // ── DOM反映 ─────────────────────────────────────────────
   bdBoardsNav.innerHTML = html;
 
-  document.getElementById('bd-home-btn')?.addEventListener('click', () => { closeSidebar(); showHome(); });
-  document.getElementById('bd-jiz-btn')?.addEventListener('click',  () => { closeSidebar(); showJizairitu(); });
-  document.getElementById('bd-ann-btn')?.addEventListener('click',  () => { closeSidebar(); showAnnouncements(); });
+  document.getElementById('bd-home-btn')?.addEventListener('click',  () => { closeSidebar(); showHome(); });
+  document.getElementById('bd-jiz-btn')?.addEventListener('click',   () => { closeSidebar(); showJizairitu(); });
+  document.getElementById('bd-ann-btn')?.addEventListener('click',   () => { closeSidebar(); showAnnouncements(); });
+  document.getElementById('bd-links-btn')?.addEventListener('click', () => { closeSidebar(); showLinks(); });
 
   bdBoardsNav.querySelectorAll('.bd-cat-hdr').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -454,9 +459,10 @@ document.getElementById('bd-modal-submit').addEventListener('click', async () =>
 // ── 戻るボタン ────────────────────────────────────────────
 bdBackBtn.addEventListener('click', () => {
   if (view === 'posts')              showThreads(currentBoard);
-  else if (view === 'threads')       showBoards();
-  else if (view === 'jizairitu')     showBoards();
+  else if (view === 'threads')       showHome();
+  else if (view === 'jizairitu')     showHome();
   else if (view === 'announcements') showHome();
+  else if (view === 'links')         showHome();
 });
 
 // ── 利用規約 / プライバシーポリシー モーダル ─────────────

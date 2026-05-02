@@ -160,3 +160,50 @@ function annItemHtml(a) {
     <div class="ann-item-body">${escHtml(a.body).replace(/\n/g, '<br>')}</div>
   </div>`;
 }
+
+// ── リンクページ ─────────────────────────────────────────────
+const LINKS_DATA = [
+  {
+    title:   '華耀天輪 真自在律 / Kayou Tenrin Shinjizairitsu',
+    desc:    'ここに流れてくる予想の、素の姿です。\nレースを選び、ボタンを押し、結果を見る。\n自動化される前の、人の手が入った自在律がここにあります。\nやりたいレースがあるなら、こちらへどうぞ。',
+    url:     'https://huggingface.co/spaces/Jiz41/Jiz41r1t5u',
+    label:   'Hugging Face で開く',
+  },
+  {
+    title:   '華耀東夷堂 X',
+    desc:    '速報・お知らせ・たまに独り言。\nこのサイトが静かな夜でも、Xは騒がしくしています。\n何かあればまずXを見てください。たぶん何か言っています。',
+    url:     'https://x.com/kayoutouidou01',
+    label:   'X で開く',
+  },
+  {
+    title:   '華耀東夷堂 note',
+    desc:    '自在律はなぜこう動くのか。華耀東夷堂はどこへ向かうのか。\n長い話はnoteに書いています。\n読み物として、暇な時にでも。',
+    url:     'https://note.com/kytnrnsnjzitr',
+    label:   'note で読む',
+  },
+];
+
+function showLinks() {
+  view = 'links';
+  currentBoard  = null;
+  currentThread = null;
+  unsubscribe();
+  clearPendingImages();
+
+  bdInputBar.style.display   = 'none';
+  bdFullBanner.style.display = 'none';
+  bdBackBtn.style.display    = 'inline-block';
+  bdTitle.textContent        = '🔗 リンク';
+
+  renderBoardsNav();
+
+  bdMain.innerHTML = `<div class="links-list">
+    ${LINKS_DATA.map(link => `
+      <div class="links-item">
+        <div class="links-title">${escHtml(link.title)}</div>
+        <div class="links-desc">${escHtml(link.desc).replace(/\n/g, '<br>')}</div>
+        <a class="links-btn" href="${escHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escHtml(link.label)} →</a>
+      </div>
+    `).join('<div class="links-sep"></div>')}
+  </div>`;
+}
