@@ -82,6 +82,12 @@ function hasUnread(boardId) {
 function renderBoardsNav() {
   const collapsed = getCollapseState();
 
+  // はじめにボタン（常設・最上部）
+  const homeHtml = `<button class="bd-board-btn${view === 'home' ? ' active' : ''}" id="bd-home-btn">
+    <span class="bd-emoji">🏠</span>
+    <span class="bd-bname">はじめに</span>
+  </button>`;
+
   // カテゴリごとに板をグルーピング
   const catBoards = {};
   const uncategorized = [];
@@ -104,7 +110,7 @@ function renderBoardsNav() {
     </button>`;
   }
 
-  let html = '';
+  let html = homeHtml;
 
   // カテゴリあり
   for (const cat of categories) {
@@ -136,6 +142,10 @@ function renderBoardsNav() {
   }
 
   bdBoardsNav.innerHTML = html;
+
+  // はじめにボタン
+  const homeBtn = document.getElementById('bd-home-btn');
+  if (homeBtn) homeBtn.addEventListener('click', () => { closeSidebar(); showHome(); });
 
   // カテゴリ折りたたみ
   bdBoardsNav.querySelectorAll('.bd-cat-hdr').forEach(btn => {
@@ -650,4 +660,4 @@ function formatDate(iso) {
 }
 
 // ── エントリーポイント ────────────────────────────────────
-window._boardInit = function() { showBoards(); };
+window._boardInit = function() { showHome(); };
