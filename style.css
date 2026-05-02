@@ -592,3 +592,74 @@ body {
   margin-top: 4px;
   letter-spacing: 0.05em;
 }
+
+/* ================================================================
+   ANNOUNCEMENTS
+================================================================ */
+
+/* ホーム内お知らせ */
+.home-ann-loading {
+  font-size: 12px;
+  color: #5a6278;
+  padding: 8px 0;
+}
+.home-ann-empty {
+  font-size: 13px;
+  color: #5a6278;
+}
+.home-ann-list { margin-top: 4px; }
+.home-ann-item {
+  border-left: 2px solid rgba(200,160,96,0.4);
+  padding: 8px 0 8px 12px;
+  margin-bottom: 14px;
+}
+.home-ann-meta {
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #5a6278;
+  margin-bottom: 3px;
+}
+.home-ann-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f0ece4;
+  margin-bottom: 4px;
+}
+.home-ann-body {
+  font-size: 12.5px;
+  color: #9aa0b0;
+  line-height: 1.7;
+}
+
+/* 全件表示ビュー */
+.ann-list { padding: 8px 0; }
+.ann-item {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.ann-item-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.ann-item-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f0ece4;
+  flex: 1;
+}
+.ann-item-date {
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #5a6278;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ann-item-body {
+  font-size: 13px;
+  color: #9aa0b0;
+  line-height: 1.75;
+  word-break: break-word;
+}

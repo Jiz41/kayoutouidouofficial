@@ -101,8 +101,9 @@ document.querySelectorAll('.adm-nav-btn').forEach(btn => {
     btn.classList.add('active');
     const tab = btn.dataset.tab;
     document.getElementById('tab-' + tab).classList.add('active');
-    if (tab === 'stats')      loadStats();
-    if (tab === 'categories') loadCategories();
+    if (tab === 'stats')         loadStats();
+    if (tab === 'categories')    loadCategories();
+    if (tab === 'announcements') loadAnnouncements();
   });
 });
 
@@ -114,6 +115,7 @@ async function initAdmin() {
   loadThreads();
   loadBans();
   loadReports();
+  loadAnnouncements();
 }
 
 // ── 板キャッシュ読み込み ─────────────────────────────────────
@@ -703,4 +705,78 @@ function renderPagination(containerId, total, page, onChange) {
   el.querySelectorAll('[data-pg]').forEach(btn => {
     btn.addEventListener('click', () => onChange(parseInt(btn.dataset.pg)));
   });
+}
+
+// ── お知らせ管理 ──────────────────────────────────────────────
+document.getElementById('new-ann-btn').addEventListener('click', createAnnouncement);
+
+async function createAnnouncement() {
+  const title = document.getElementById('new-ann-title').value.trim();
+  const body  = document.getElementById('new-ann-body').value.trim();
+  if (!title || !body) { alert('タイトルと本文を入力してください'); return; }
+
+  const { error } = await sb.from('announcements').insert({ title, body });
+  if (error) { alert('投稿失敗: ' + error.message); return; }
+  document.getElementById('new-ann-title').value = '';
+  document.getElementById('new-ann-body').value  = '';
+  showMsg(document.getElementById('ann-msg'), '投稿しました');
+  loadAnnouncements();
+}
+
+async function loadAnnouncements() {
+  const wrap = document.getElementById('announcements-table-wrap');
+  wrap.innerHTML = '<div class="adm-loading">読み込み中…</div>';
+
+  const { data, error } = await sb
+    .from('announcements')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) { wrap.innerHTML = `<div class="adm-empty">エラー: ${esc(error.message)}</div>`; return; }
+  if (!data?.length) { wrap.innerHTML = '<div class="adm-empty">お知らせはありません</div>'; return; }
+
+  wrap.innerHTML = `<div class="adm-table-wrap"><table>
+    <thead><tr>
+      <th>タイトル</th><th>本文</th><th>投稿日時</th><th>操作</th>
+    </tr></thead>
+    <tbody>
+      ${data.map(a => `<tr>
+        <td style="min-width:120px">${esc(a.title)}</td>
+        <td class="td-body">${esc(a.body).substring(0, 100)}${a.body.length > 100 ? '…' : ''}</td>
+        <td class="td-mono">${fmtDate(a.created_at)}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-ghost" data-edit-ann="${esc(a.id)}" data-title="${esc(a.title)}" data-body="${esc(a.body)}" style="font-size:11px">編集</button>
+          <button class="btn btn-danger" data-del-ann="${esc(a.id)}" style="font-size:11px">削除</button>
+        </div></td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div>`;
+
+  wrap.querySelectorAll('[data-edit-ann]').forEach(btn => {
+    btn.addEventListener('click', () => editAnnouncement(btn.dataset.editAnn, btn.dataset.title, btn.dataset.body));
+  });
+  wrap.querySelectorAll('[data-del-ann]').forEach(btn => {
+    btn.addEventListener('click', () => deleteAnnouncement(btn.dataset.delAnn));
+  });
+}
+
+async function editAnnouncement(id, currentTitle, currentBody) {
+  const title = prompt('タイトルを編集', currentTitle);
+  if (title === null) return;
+  const body = prompt('本文を編集', currentBody);
+  if (body === null) return;
+  if (!title.trim() || !body.trim()) { alert('タイトルと本文を入力してください'); return; }
+
+  const { error } = await sb.from('announcements').update({ title: title.trim(), body: body.trim() }).eq('id', id);
+  if (error) { alert('編集失敗: ' + error.message); return; }
+  showMsg(document.getElementById('ann-msg'), '更新しました');
+  loadAnnouncements();
+}
+
+async function deleteAnnouncement(id) {
+  if (!confirm('このお知らせを削除しますか？')) return;
+  const { error } = await sb.from('announcements').delete().eq('id', id);
+  if (error) { alert('削除失敗: ' + error.message); return; }
+  showMsg(document.getElementById('ann-msg'), '削除しました');
+  loadAnnouncements();
 }

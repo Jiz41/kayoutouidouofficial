@@ -71,7 +71,7 @@ async function showHome() {
       <div class="home-section">
         <div class="home-block-title">🔧 アップデート／メンテナンス情報</div>
         <p>機能追加・障害・メンテナンスなど、<br>このサイトに関するお知らせを掲載します。</p>
-        <p>何か起きたらまずここを確認してください。</p>
+        <div id="home-ann-list" class="home-ann-loading">読み込み中…</div>
       </div>
 
       <div class="home-footer">
@@ -81,4 +81,82 @@ async function showHome() {
 
     </div>
   `;
+
+  loadHomeAnnouncements();
+}
+
+async function loadHomeAnnouncements() {
+  const listEl = document.getElementById('home-ann-list');
+  if (!listEl) return;
+
+  const { data, error } = await sb
+    .from('announcements')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  if (error) {
+    listEl.innerHTML = '<p style="color:#7a8090;font-size:13px">読み込みに失敗しました。</p>';
+    return;
+  }
+
+  if (!data || !data.length) {
+    listEl.innerHTML = '<p class="home-ann-empty">現在お知らせはありません。</p>';
+    return;
+  }
+
+  listEl.className = 'home-ann-list';
+  listEl.innerHTML = data.map(a => `
+    <div class="home-ann-item">
+      <div class="home-ann-meta">${formatDate(a.created_at)}</div>
+      <div class="home-ann-title">${escHtml(a.title)}</div>
+      <div class="home-ann-body">${escHtml(a.body).replace(/\n/g, '<br>')}</div>
+    </div>
+  `).join('');
+}
+
+// ── アプデ/メンテ情報 全件表示 ───────────────────────────────
+async function showAnnouncements() {
+  view = 'announcements';
+  currentBoard  = null;
+  currentThread = null;
+  unsubscribe();
+  clearPendingImages();
+
+  bdInputBar.style.display   = 'none';
+  bdFullBanner.style.display = 'none';
+  bdBackBtn.style.display    = 'inline-block';
+  bdTitle.textContent        = '🔧 アプデ/メンテ情報';
+
+  renderBoardsNav();
+
+  bdMain.innerHTML = '<div class="bd-loading">読み込み中…</div>';
+
+  const { data, error } = await sb
+    .from('announcements')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    bdMain.innerHTML = `<div class="bd-empty">エラー: ${escHtml(error.message)}</div>`;
+    return;
+  }
+
+  if (!data || !data.length) {
+    bdMain.innerHTML = '<div class="bd-empty">現在お知らせはありません。</div>';
+    return;
+  }
+
+  bdMain.innerHTML = `<div class="ann-list">${data.map(annItemHtml).join('')}</div>`;
+}
+
+function annItemHtml(a) {
+  return `<div class="ann-item">
+    <div class="ann-item-hdr">
+      <span class="ann-item-title">${escHtml(a.title)}</span>
+      <span class="ann-item-date">${formatDate(a.created_at)}</span>
+    </div>
+    <div class="ann-item-body">${escHtml(a.body).replace(/\n/g, '<br>')}</div>
+  </div>`;
 }

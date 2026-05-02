@@ -82,10 +82,14 @@ function hasUnread(boardId) {
 function renderBoardsNav() {
   const collapsed = getCollapseState();
 
-  // はじめにボタン（常設・最上部）
+  // はじめに・アプデ/メンテボタン（常設・最上部）
   const homeHtml = `<button class="bd-board-btn${view === 'home' ? ' active' : ''}" id="bd-home-btn">
     <span class="bd-emoji">🏠</span>
     <span class="bd-bname">はじめに</span>
+  </button>
+  <button class="bd-board-btn${view === 'announcements' ? ' active' : ''}" id="bd-ann-btn">
+    <span class="bd-emoji">🔧</span>
+    <span class="bd-bname">アプデ/メンテ情報</span>
   </button>`;
 
   // カテゴリごとに板をグルーピング
@@ -146,6 +150,10 @@ function renderBoardsNav() {
   // はじめにボタン
   const homeBtn = document.getElementById('bd-home-btn');
   if (homeBtn) homeBtn.addEventListener('click', () => { closeSidebar(); showHome(); });
+
+  // アプデ/メンテ情報ボタン
+  const annBtn = document.getElementById('bd-ann-btn');
+  if (annBtn) annBtn.addEventListener('click', () => { closeSidebar(); showAnnouncements(); });
 
   // カテゴリ折りたたみ
   bdBoardsNav.querySelectorAll('.bd-cat-hdr').forEach(btn => {
@@ -449,9 +457,10 @@ document.getElementById('bd-modal-submit').addEventListener('click', async () =>
 
 // ── 戻るボタン ────────────────────────────────────────────
 bdBackBtn.addEventListener('click', () => {
-  if (view === 'posts')           showThreads(currentBoard);
-  else if (view === 'threads')    showBoards();
-  else if (view === 'jizairitu')  showBoards();
+  if (view === 'posts')              showThreads(currentBoard);
+  else if (view === 'threads')       showBoards();
+  else if (view === 'jizairitu')     showBoards();
+  else if (view === 'announcements') showHome();
 });
 
 // ── 利用規約 / プライバシーポリシー モーダル ─────────────

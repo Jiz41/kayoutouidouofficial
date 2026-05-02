@@ -398,6 +398,7 @@
     <button class="adm-nav-btn" data-tab="categories">🗂 カテゴリ管理</button>
     <button class="adm-nav-btn" data-tab="users">🚫 ユーザー管理</button>
     <button class="adm-nav-btn" data-tab="reports">🚨 通報管理</button>
+    <button class="adm-nav-btn" data-tab="announcements">🔧 お知らせ管理</button>
     <button class="adm-nav-btn" data-tab="stats">📊 統計</button>
   </nav>
 
@@ -512,6 +513,23 @@
         <button class="btn btn-primary" id="report-search-btn">絞り込み</button>
       </div>
       <div id="reports-table-wrap">
+        <div class="adm-loading">読み込み中…</div>
+      </div>
+    </section>
+
+    <!-- お知らせ管理 -->
+    <section class="adm-section" id="tab-announcements">
+      <div class="adm-section-title">🔧 お知らせ管理</div>
+      <div class="adm-card">
+        <h3>お知らせを投稿</h3>
+        <div class="form-row">
+          <input type="text" id="new-ann-title" placeholder="タイトル">
+          <textarea id="new-ann-body" placeholder="本文" rows="3"></textarea>
+          <button class="btn btn-accent" id="new-ann-btn">投稿</button>
+        </div>
+      </div>
+      <div id="ann-msg" style="display:none;margin-bottom:10px;font-size:13px"></div>
+      <div id="announcements-table-wrap">
         <div class="adm-loading">読み込み中…</div>
       </div>
     </section>
