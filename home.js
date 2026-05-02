@@ -1,4 +1,4 @@
-function showHome() {
+async function showHome() {
   view = 'home';
   currentBoard  = null;
   currentThread = null;
@@ -9,6 +9,23 @@ function showHome() {
   bdFullBanner.style.display = 'none';
   bdBackBtn.style.display    = 'none';
   bdTitle.textContent        = '華耀東夷堂';
+
+  // 板データ未取得の場合のみSupabaseから取得
+  if (!boards.length) {
+    const [boardsRes, catsRes, actRes] = await Promise.all([
+      sb.from('boards').select('*').order('sort_order').order('created_at'),
+      sb.from('categories').select('*').order('sort_order'),
+      sb.from('threads').select('board_id, created_at').order('created_at', { ascending: false }).limit(300),
+    ]);
+    if (!boardsRes.error) {
+      boards     = boardsRes.data || [];
+      categories = catsRes.data   || [];
+      activityMap = {};
+      for (const t of (actRes.data || [])) {
+        if (!activityMap[t.board_id]) activityMap[t.board_id] = t.created_at;
+      }
+    }
+  }
 
   renderBoardsNav();
 
