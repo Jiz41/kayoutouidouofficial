@@ -155,6 +155,13 @@ function renderBoardsNav() {
       if (board) { closeSidebar(); showThreads(board); }
     });
   });
+
+  // 自在律A.L.Lボタン
+  const jizBtn = document.createElement('button');
+  jizBtn.className = 'bd-board-btn';
+  jizBtn.innerHTML = '<span class="bd-emoji">👁</span><span class="bd-bname">自在律A.L.L</span>';
+  jizBtn.addEventListener('click', () => { closeSidebar(); showJizairitu(); });
+  bdBoardsNav.appendChild(jizBtn);
 }
 
 // ── 板一覧 ────────────────────────────────────────────────
@@ -432,8 +439,9 @@ document.getElementById('bd-modal-submit').addEventListener('click', async () =>
 
 // ── 戻るボタン ────────────────────────────────────────────
 bdBackBtn.addEventListener('click', () => {
-  if (view === 'posts')        showThreads(currentBoard);
-  else if (view === 'threads') showBoards();
+  if (view === 'posts')           showThreads(currentBoard);
+  else if (view === 'threads')    showBoards();
+  else if (view === 'jizairitu')  showBoards();
 });
 
 // ── 利用規約 / プライバシーポリシー モーダル ─────────────
