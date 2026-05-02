@@ -81,22 +81,22 @@ function hasUnread(boardId) {
 // ── サイドバー板ナビ描画（Discord 2層構造） ──────────────
 function renderBoardsNav() {
   const collapsed = getCollapseState();
-
   const SEP = '<div class="bd-nav-sep"></div>';
 
-  // 🏠 → SEP → 👁 → SEP → 📋ラベル → カテゴリ群 → SEP → 🔧
-  let html =
-    `<button class="bd-board-btn${view === 'home' ? ' active' : ''}" id="bd-home-btn">
-      <span class="bd-emoji">🏠</span>
-      <span class="bd-bname">はじめに</span>
-    </button>` +
-    SEP +
-    `<button class="bd-board-btn${view === 'jizairitu' ? ' active' : ''}" id="bd-jiz-btn">
-      <span class="bd-emoji">👁</span>
-      <span class="bd-bname">真自在律A.L.L</span>
-    </button>` +
-    SEP +
-    `<div class="bd-nav-label">📋 掲示板</div>`;
+  // ── ① はじめに ──────────────────────────────────────────
+  let html = `<button class="bd-board-btn${view === 'home' ? ' active' : ''}" id="bd-home-btn">
+    <span class="bd-emoji">🏠</span><span class="bd-bname">はじめに</span>
+  </button>`;
+
+  // ── ② 区切り → 真自在律 ────────────────────────────────
+  html += SEP;
+  html += `<button class="bd-board-btn${view === 'jizairitu' ? ' active' : ''}" id="bd-jiz-btn">
+    <span class="bd-emoji">👁</span><span class="bd-bname">真自在律A.L.L</span>
+  </button>`;
+
+  // ── ③ 区切り → 掲示板ラベル → カテゴリ群 ──────────────
+  html += SEP;
+  html += `<div class="bd-nav-label">📋 掲示板</div>`;
 
   // カテゴリごとに板をグルーピング
   const catBoards = {};
@@ -110,17 +110,16 @@ function renderBoardsNav() {
     }
   }
 
-  function boardBtnHtml(b) {
-    const active   = currentBoard?.id === b.id ? 'active' : '';
-    const unread   = hasUnread(b.id) ? '<span class="bd-unread">●</span>' : '';
+  const boardBtnHtml = (b) => {
+    const active = currentBoard?.id === b.id ? 'active' : '';
+    const unread = hasUnread(b.id) ? '<span class="bd-unread">●</span>' : '';
     return `<button class="bd-board-btn ${active}" data-id="${b.id}">
       <span class="bd-emoji">${escHtml(b.emoji || '📋')}</span>
       <span class="bd-bname">${escHtml(b.name)}</span>
       ${unread}
     </button>`;
-  }
+  };
 
-  // カテゴリあり
   for (const cat of categories) {
     const bList = catBoards[cat.id] || [];
     const isCollapsed = !!collapsed[cat.id];
@@ -135,7 +134,6 @@ function renderBoardsNav() {
     </div>`;
   }
 
-  // 未分類
   if (uncategorized.length) {
     const isCollapsed = !!collapsed['__uncategorized__'];
     html += `<div class="bd-category">
@@ -149,27 +147,19 @@ function renderBoardsNav() {
     </div>`;
   }
 
-  // SEP + 🔧ボタンを末尾に追加
-  html +=
-    SEP +
-    `<button class="bd-board-btn${view === 'announcements' ? ' active' : ''}" id="bd-ann-btn">
-      <span class="bd-emoji">🔧</span>
-      <span class="bd-bname">アプデ/メンテ情報</span>
-    </button>`;
+  // ── ④ 区切り → アプデ/メンテ ───────────────────────────
+  html += SEP;
+  html += `<button class="bd-board-btn${view === 'announcements' ? ' active' : ''}" id="bd-ann-btn">
+    <span class="bd-emoji">🔧</span><span class="bd-bname">アプデ/メンテ情報</span>
+  </button>`;
 
+  // ── DOM反映 ─────────────────────────────────────────────
   bdBoardsNav.innerHTML = html;
 
-  // 各固定ボタンのイベント
-  const homeBtn = document.getElementById('bd-home-btn');
-  if (homeBtn) homeBtn.addEventListener('click', () => { closeSidebar(); showHome(); });
+  document.getElementById('bd-home-btn')?.addEventListener('click', () => { closeSidebar(); showHome(); });
+  document.getElementById('bd-jiz-btn')?.addEventListener('click',  () => { closeSidebar(); showJizairitu(); });
+  document.getElementById('bd-ann-btn')?.addEventListener('click',  () => { closeSidebar(); showAnnouncements(); });
 
-  const jizBtn = document.getElementById('bd-jiz-btn');
-  if (jizBtn) jizBtn.addEventListener('click', () => { closeSidebar(); showJizairitu(); });
-
-  const annBtn = document.getElementById('bd-ann-btn');
-  if (annBtn) annBtn.addEventListener('click', () => { closeSidebar(); showAnnouncements(); });
-
-  // カテゴリ折りたたみ
   bdBoardsNav.querySelectorAll('.bd-cat-hdr').forEach(btn => {
     btn.addEventListener('click', () => {
       const catId = btn.dataset.catId;
@@ -180,14 +170,12 @@ function renderBoardsNav() {
     });
   });
 
-  // 板ボタン
-  bdBoardsNav.querySelectorAll('.bd-board-btn').forEach(btn => {
+  bdBoardsNav.querySelectorAll('.bd-board-btn[data-id]').forEach(btn => {
     btn.addEventListener('click', () => {
       const board = boards.find(b => String(b.id) === btn.dataset.id);
       if (board) { closeSidebar(); showThreads(board); }
     });
   });
-
 }
 
 // ── 板一覧 ────────────────────────────────────────────────
