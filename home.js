@@ -49,7 +49,7 @@ async function showHome() {
       <div class="home-divider"></div>
 
       <div class="home-section">
-        <div class="home-block-title">👁 自在律A.L.L</div>
+        <div class="home-block-title">👁 真自在律A.L.L</div>
         <div class="home-block-sub">Automata Lex Libera（自律する法、自由なる律）</div>
         <p>手入力で動かす予想システム「自在律」を、自動で稼働させたものです。<br>オートマとマニュアルの違い、と思っていただければ。</p>
         <p>自動選定ゆえ、見たいレースが流れてくるとは限りません。<br>精度も、マニュアルにはわずかに及びません。</p>
