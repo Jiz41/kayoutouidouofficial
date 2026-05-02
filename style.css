@@ -663,3 +663,10 @@ body {
   line-height: 1.75;
   word-break: break-word;
 }
+
+/* ── サイドバー区切り線 ── */
+.bd-nav-sep {
+  height: 0.4px;
+  background: rgba(255,255,255,0.08);
+  margin: 4px 8px;
+}

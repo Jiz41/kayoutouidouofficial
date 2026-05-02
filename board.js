@@ -82,15 +82,21 @@ function hasUnread(boardId) {
 function renderBoardsNav() {
   const collapsed = getCollapseState();
 
-  // はじめに・アプデ/メンテボタン（常設・最上部）
-  const homeHtml = `<button class="bd-board-btn${view === 'home' ? ' active' : ''}" id="bd-home-btn">
-    <span class="bd-emoji">🏠</span>
-    <span class="bd-bname">はじめに</span>
-  </button>
-  <button class="bd-board-btn${view === 'announcements' ? ' active' : ''}" id="bd-ann-btn">
-    <span class="bd-emoji">🔧</span>
-    <span class="bd-bname">アプデ/メンテ情報</span>
-  </button>`;
+  const SEP = '<div class="bd-nav-sep"></div>';
+
+  // 🏠 → SEP → 👁 → SEP → 📋ラベル → カテゴリ群 → SEP → 🔧
+  let html =
+    `<button class="bd-board-btn${view === 'home' ? ' active' : ''}" id="bd-home-btn">
+      <span class="bd-emoji">🏠</span>
+      <span class="bd-bname">はじめに</span>
+    </button>` +
+    SEP +
+    `<button class="bd-board-btn${view === 'jizairitu' ? ' active' : ''}" id="bd-jiz-btn">
+      <span class="bd-emoji">👁</span>
+      <span class="bd-bname">真自在律A.L.L</span>
+    </button>` +
+    SEP +
+    `<div class="bd-nav-label">📋 掲示板</div>`;
 
   // カテゴリごとに板をグルーピング
   const catBoards = {};
@@ -113,8 +119,6 @@ function renderBoardsNav() {
       ${unread}
     </button>`;
   }
-
-  let html = homeHtml;
 
   // カテゴリあり
   for (const cat of categories) {
@@ -145,13 +149,23 @@ function renderBoardsNav() {
     </div>`;
   }
 
+  // SEP + 🔧ボタンを末尾に追加
+  html +=
+    SEP +
+    `<button class="bd-board-btn${view === 'announcements' ? ' active' : ''}" id="bd-ann-btn">
+      <span class="bd-emoji">🔧</span>
+      <span class="bd-bname">アプデ/メンテ情報</span>
+    </button>`;
+
   bdBoardsNav.innerHTML = html;
 
-  // はじめにボタン
+  // 各固定ボタンのイベント
   const homeBtn = document.getElementById('bd-home-btn');
   if (homeBtn) homeBtn.addEventListener('click', () => { closeSidebar(); showHome(); });
 
-  // アプデ/メンテ情報ボタン
+  const jizBtn = document.getElementById('bd-jiz-btn');
+  if (jizBtn) jizBtn.addEventListener('click', () => { closeSidebar(); showJizairitu(); });
+
   const annBtn = document.getElementById('bd-ann-btn');
   if (annBtn) annBtn.addEventListener('click', () => { closeSidebar(); showAnnouncements(); });
 
@@ -174,12 +188,6 @@ function renderBoardsNav() {
     });
   });
 
-  // 自在律A.L.Lボタン
-  const jizBtn = document.createElement('button');
-  jizBtn.className = 'bd-board-btn';
-  jizBtn.innerHTML = '<span class="bd-emoji">👁</span><span class="bd-bname">真自在律A.L.L</span>';
-  jizBtn.addEventListener('click', () => { closeSidebar(); showJizairitu(); });
-  bdBoardsNav.appendChild(jizBtn);
 }
 
 // ── 板一覧 ────────────────────────────────────────────────
