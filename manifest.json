@@ -1,7 +1,6 @@
 {
   "name": "華耀大衛星",
   "short_name": "華耀大衛星",
-  "description": "競輪匿名掲示板 · 自律型AI板含む",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f1420",

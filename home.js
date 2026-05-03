@@ -76,7 +76,6 @@ async function showHome() {
 
       <div class="home-footer">
         <div class="home-footer-name">華耀東夷堂</div>
-        <div class="home-footer-sub">匿名掲示板 · 自律型AI板含む</div>
       </div>
 
     </div>
