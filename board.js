@@ -94,7 +94,13 @@ function renderBoardsNav() {
     <span class="bd-emoji">👁</span><span class="bd-bname">真自在律A.L.L</span>
   </button>`;
 
-  // ── ③ 区切り → 掲示板ラベル → カテゴリ群 ──────────────
+  // ── ③ 区切り → ニュース速報 ────────────────────────────
+  html += SEP;
+  html += `<button class="bd-board-btn${view === 'news' ? ' active' : ''}" id="bd-news-btn">
+    <span class="bd-emoji">📰</span><span class="bd-bname">ニュース速報</span>
+  </button>`;
+
+  // ── ④ 区切り → 掲示板ラベル → カテゴリ群 ──────────────
   html += SEP;
   html += `<div class="bd-nav-label">📋 掲示板</div>`;
 
@@ -147,7 +153,7 @@ function renderBoardsNav() {
     </div>`;
   }
 
-  // ── ④ 区切り → アプデ/メンテ → 区切り → リンク ──────────
+  // ── ⑤ 区切り → アプデ/メンテ → 区切り → リンク ──────────
   html += SEP;
   html += `<button class="bd-board-btn${view === 'announcements' ? ' active' : ''}" id="bd-ann-btn">
     <span class="bd-emoji">🔧</span><span class="bd-bname">アプデ/メンテ情報</span>
@@ -155,10 +161,6 @@ function renderBoardsNav() {
   html += SEP;
   html += `<button class="bd-board-btn${view === 'links' ? ' active' : ''}" id="bd-links-btn">
     <span class="bd-emoji">🔗</span><span class="bd-bname">リンク</span>
-  </button>`;
-  html += SEP;
-  html += `<button class="bd-board-btn${view === 'news' ? ' active' : ''}" id="bd-news-btn">
-    <span class="bd-emoji">📰</span><span class="bd-bname">ニュース速報</span>
   </button>`;
 
   // ── DOM反映 ─────────────────────────────────────────────
