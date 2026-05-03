@@ -12,11 +12,12 @@
 
 // ── 星フィールド ──────────────────────────────────────────
 (function initStarfield() {
-  const canvas = document.getElementById('starfield');
-  const ctx    = canvas.getContext('2d');
-  let W, H, stars = [];
+  const canvas = document.getElementById('starfield-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [], flowStars = [], satellite = null;
 
-  // 星の色: 白系 87.5% / 琥珀 12.5%
+  // 静止星の色: 白系 87.5% / 琥珀 12.5%
   const COLORS = [
     [220, 215, 200],
     [220, 215, 200],
@@ -24,50 +25,98 @@
     [220, 215, 200],
     [220, 215, 200],
     [220, 215, 200],
-    [200, 160,  96], // 琥珀
+    [200, 160,  96],
     [220, 215, 200],
   ];
 
   function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+    W = canvas.width  = canvas.offsetWidth  || canvas.parentElement.clientWidth  || 430;
+    H = canvas.height = canvas.offsetHeight || canvas.parentElement.clientHeight || 700;
+    initStars();
+    initFlowStars();
+    initSatellite();
   }
 
   function initStars() {
     stars = [];
-    const skyH = H * 0.72; // 下部ビル群の上まで
+    const skyH = H * 0.72;
     const count = Math.floor((W * skyH) / 1600);
     for (let i = 0; i < count; i++) {
       const col = COLORS[Math.floor(Math.random() * COLORS.length)];
-      const sz  = Math.random() < 0.15 ? 2 : 1; // 1pxが主、ときどき2px
+      const sz  = Math.random() < 0.15 ? 2 : 1;
       stars.push({
         x:     Math.floor(Math.random() * W),
         y:     Math.floor(Math.random() * skyH),
-        sz,
-        col,
-        base:  Math.random() * 0.12 + 0.07,  // 基本輝度
-        amp:   Math.random() * 0.06 + 0.02,  // 明滅幅
+        sz, col,
+        base:  Math.random() * 0.12 + 0.07,
+        amp:   Math.random() * 0.06 + 0.02,
         speed: Math.random() * 0.00035 + 0.00008,
         phase: Math.random() * Math.PI * 2,
       });
     }
   }
 
+  function initFlowStars() {
+    flowStars = [];
+    const count = 100 + Math.floor(Math.random() * 51); // 100〜150
+    const skyH  = H * 0.72;
+    for (let i = 0; i < count; i++) {
+      flowStars.push({
+        x:     Math.random() * W,
+        y:     Math.random() * skyH,
+        dx:    -(0.03 + Math.random() * 0.08), // -0.03〜-0.11 px/frame
+        base:  Math.random() * 0.10 + 0.04,
+        amp:   Math.random() * 0.05 + 0.02,
+        speed: Math.random() * 0.00030 + 0.00006,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+  }
+
+  function initSatellite() {
+    satellite = {
+      x:     W * 0.85,
+      y:     25,
+      base:  0.25,
+      amp:   0.22,
+      speed: 0.00025,
+      phase: 0,
+    };
+  }
+
   function draw(t) {
     ctx.clearRect(0, 0, W, H);
+
+    // 静止星
     for (const s of stars) {
       const alpha = s.base + Math.sin(t * s.speed + s.phase) * s.amp;
       const [r, g, b] = s.col;
       ctx.fillStyle = `rgba(${r},${g},${b},${alpha.toFixed(3)})`;
       ctx.fillRect(s.x, s.y, s.sz, s.sz);
     }
+
+    // 流れ星（右→左ドリフト）
+    for (const s of flowStars) {
+      s.x += s.dx;
+      if (s.x < -2) s.x = W + 1;
+      const alpha = s.base + Math.sin(t * s.speed + s.phase) * s.amp;
+      ctx.fillStyle = `rgba(220,215,200,${alpha.toFixed(3)})`;
+      ctx.fillRect(s.x, s.y, 1, 1);
+    }
+
+    // 衛星（赤点・超スロー明滅）
+    if (satellite) {
+      const alpha = satellite.base + Math.sin(t * satellite.speed + satellite.phase) * satellite.amp;
+      ctx.fillStyle = `rgba(210,55,45,${alpha.toFixed(3)})`;
+      ctx.fillRect(satellite.x, satellite.y, 2, 2);
+    }
+
     requestAnimationFrame(draw);
   }
 
   resize();
-  initStars();
   requestAnimationFrame(draw);
-  window.addEventListener('resize', () => { resize(); initStars(); });
+  window.addEventListener('resize', resize);
 })();
 
 

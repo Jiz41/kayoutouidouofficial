@@ -29,7 +29,6 @@
      背景レイヤー（レターボックス領域のみ — コンテンツに非干渉）
 ================================================================ -->
 <div id="bg-layer">
-  <canvas id="starfield" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
   <canvas id="city-canvas" style="position:absolute;bottom:0;left:0;width:100%;pointer-events:none;z-index:1;"></canvas>
 </div>
 
@@ -125,6 +124,7 @@
 
   <!-- SCENE 3: 掲示板 -->
   <div id="scene-main">
+    <canvas id="starfield-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
     <div id="board-root">
 
       <!-- サイドバーオーバーレイ -->
