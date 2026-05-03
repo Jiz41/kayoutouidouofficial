@@ -552,6 +552,14 @@ function hideAnchorPopup() {
 bdMain.addEventListener('scroll', hideAnchorPopup);
 
 // ── 本文パース ────────────────────────────────────────────
+function extractYouTubeId(url) {
+  let m = url.match(/youtube\.com\/watch\?(?:[^&\s]*&)*v=([a-zA-Z0-9_-]{11})/);
+  if (m) return m[1];
+  m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  if (m) return m[1];
+  return null;
+}
+
 function processBody(body) {
   let s = escHtml(body);
   s = s.replace(/&gt;&gt;(\d+)/g, (_, n) =>
@@ -560,6 +568,14 @@ function processBody(body) {
     const url = raw.replace(/&amp;/g, '&');
     if (/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(url)) {
       return `<img src="${url}" class="inline-img" loading="lazy" data-lb="${url}">`;
+    }
+    const ytId = extractYouTubeId(url);
+    if (ytId) {
+      const thumb   = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`;
+      const ytUrl   = `https://www.youtube.com/watch?v=${ytId}`;
+      return `<a href="${ytUrl}" target="_blank" rel="noopener noreferrer">${raw}</a>` +
+             `<a href="${ytUrl}" target="_blank" rel="noopener noreferrer" class="yt-thumb-wrap">` +
+             `<img src="${thumb}" class="yt-thumb" loading="lazy" alt="YouTube"></a>`;
     }
     return `<a href="${url}" target="_blank" rel="noopener noreferrer">${raw}</a>`;
   });

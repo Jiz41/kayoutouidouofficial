@@ -817,3 +817,22 @@ a.news-item:hover .news-item-title {
 .news-list .news-item + .news-item {
   border-top: 1px solid rgba(255,255,255,.05);
 }
+
+/* ── YouTube サムネイル ── */
+.yt-thumb-wrap {
+  display: block;
+  margin-top: 8px;
+  width: fit-content;
+}
+.yt-thumb {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  opacity: 0.88;
+  transition: opacity .15s;
+}
+.yt-thumb-wrap:hover .yt-thumb {
+  opacity: 1;
+}
