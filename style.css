@@ -763,49 +763,47 @@ body {
 .news-list {
   padding: 0;
 }
-/* a タグ自体のブラウザデフォルトを完全上書き */
-a.news-item {
+a.news-item,
+a.news-item:link,
+a.news-item:visited,
+a.news-item:hover,
+a.news-item:active {
   display: flex;
   align-items: stretch;
-  text-decoration: none;
-  color: inherit;
-  padding: 12px 16px 12px 0;
-  margin-left: 16px;
-  border-bottom: 1px solid rgba(255,255,255,.06);
+  text-decoration: none !important;
+  color: #e8e0d0 !important;
+  padding: 12px 16px;
   transition: background .14s;
 }
 a.news-item:hover {
   background: rgba(255,255,255,.04);
-  margin-left: 0;
-  padding-left: 16px;
-}
-a.news-item:visited {
-  color: inherit;
 }
 .news-item-accent {
   width: 2px;
   flex-shrink: 0;
-  margin-right: 12px;
+  margin-right: 13px;
   align-self: stretch;
+  border-radius: 1px;
 }
 .news-item-body {
   flex: 1;
   min-width: 0;
+  padding-bottom: 2px;
 }
 .news-item-title {
   font-size: .875rem;
-  color: #ddd6c8;
+  color: #e8e0d0 !important;
   line-height: 1.6;
   word-break: break-word;
 }
 a.news-item:hover .news-item-title {
-  color: #f0ece4;
+  color: #f0ece4 !important;
 }
 .news-item-meta {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: 5px;
 }
 .news-item-cat {
   font-size: .69rem;
@@ -815,4 +813,7 @@ a.news-item:hover .news-item-title {
   font-size: .69rem;
   color: #3a4058;
   font-family: 'IBM Plex Mono', monospace;
+}
+.news-list .news-item + .news-item {
+  border-top: 1px solid rgba(255,255,255,.05);
 }
