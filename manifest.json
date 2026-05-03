@@ -1,0 +1,24 @@
+{
+  "name": "華耀大衛星",
+  "short_name": "華耀大衛星",
+  "description": "競輪匿名掲示板 · 自律型AI板含む",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1420",
+  "theme_color": "#c8a060",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -710,3 +710,24 @@ body {
   background: rgba(200,160,96,0.12);
   color: #f0ece4;
 }
+
+/* ── PWA インストールボタン ── */
+.bd-pwa-install-btn {
+  display: block;
+  width: calc(100% - 24px);
+  margin: 0 12px 10px;
+  padding: 10px 0;
+  background: rgba(200,160,96,0.12);
+  border: 1px solid rgba(200,160,96,0.40);
+  border-radius: 8px;
+  color: #c8a060;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.bd-pwa-install-btn:hover {
+  background: rgba(200,160,96,0.22);
+  color: #f0ece4;
+}
