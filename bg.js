@@ -30,8 +30,8 @@
   ];
 
   function resize() {
-    W = canvas.width  = canvas.offsetWidth  || canvas.parentElement.clientWidth  || 430;
-    H = canvas.height = canvas.offsetHeight || canvas.parentElement.clientHeight || 700;
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
     initStars();
     initFlowStars();
     initSatellite();
@@ -48,8 +48,8 @@
         x:     Math.floor(Math.random() * W),
         y:     Math.floor(Math.random() * skyH),
         sz, col,
-        base:  Math.random() * 0.12 + 0.07,
-        amp:   Math.random() * 0.06 + 0.02,
+        base:  Math.random() * 0.42 + 0.28,  // 旧0.07〜0.19 → 4倍
+        amp:   Math.random() * 0.22 + 0.08,  // 旧0.02〜0.08 → 4倍
         speed: Math.random() * 0.00035 + 0.00008,
         phase: Math.random() * Math.PI * 2,
       });
@@ -64,9 +64,9 @@
       flowStars.push({
         x:     Math.random() * W,
         y:     Math.random() * skyH,
-        dx:    -(0.03 + Math.random() * 0.08), // -0.03〜-0.11 px/frame
-        base:  Math.random() * 0.10 + 0.04,
-        amp:   Math.random() * 0.05 + 0.02,
+        dx:    -(0.03 + Math.random() * 0.08),
+        base:  Math.random() * 0.32 + 0.16,  // 旧0.04〜0.14 → 4倍
+        amp:   Math.random() * 0.16 + 0.08,  // 旧0.02〜0.07 → 4倍
         speed: Math.random() * 0.00030 + 0.00006,
         phase: Math.random() * Math.PI * 2,
       });
@@ -75,10 +75,10 @@
 
   function initSatellite() {
     satellite = {
-      x:     W * 0.85,
+      x:     window.innerWidth * 0.85,
       y:     25,
-      base:  0.25,
-      amp:   0.22,
+      base:  0.55,
+      amp:   0.35,
       speed: 0.00025,
       phase: 0,
     };
@@ -116,7 +116,10 @@
 
   resize();
   requestAnimationFrame(draw);
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', () => {
+    resize();
+    if (satellite) satellite.x = window.innerWidth * 0.85;
+  });
 })();
 
 
