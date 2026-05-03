@@ -1,7 +1,8 @@
 {
   "name": "華耀大衛星",
   "short_name": "華耀大衛星",
-  "start_url": "/",
+  "scope": "/kayoutouidouofficial/",
+  "start_url": "/kayoutouidouofficial/",
   "display": "standalone",
   "background_color": "#0f1420",
   "theme_color": "#c8a060",

@@ -1,5 +1,9 @@
-const CACHE = 'satellite-v1';
-const PRECACHE = ['index.html', 'style.css'];
+const CACHE = 'satellite-v2';
+const PRECACHE = [
+  '/kayoutouidouofficial/',
+  '/kayoutouidouofficial/index.html',
+  '/kayoutouidouofficial/style.css',
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(
