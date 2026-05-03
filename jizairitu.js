@@ -99,8 +99,12 @@ function buildStatusBar(log) {
     ? '<span class="jizairi-badge jizairi-badge-on">🟢 稼働中</span>'
     : '<span class="jizairi-badge jizairi-badge-off">🔴 停止中</span>';
   let txt;
-  if (log.result === 'found' && log.venue && log.race_num) {
-    txt = `最終更新：${escHtml(log.venue)} ${log.race_num}R`;
+  if (log.result === 'found' && log.venue) {
+    // race_num が null の場合は race_id の末尾2桁から復元
+    const num = (log.race_num != null)
+      ? log.race_num
+      : (log.race_id ? parseInt(log.race_id.slice(-2), 10) : null);
+    txt = `最終更新：${escHtml(log.venue)} ${num != null ? num + 'R' : ''}`.trimEnd();
   } else {
     txt = `${jstHHMM(log.executed_at)} に選定実行・該当レースなし`;
   }
