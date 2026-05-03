@@ -553,9 +553,12 @@ bdMain.addEventListener('scroll', hideAnchorPopup);
 
 // ── 本文パース ────────────────────────────────────────────
 function extractYouTubeId(url) {
-  let m = url.match(/youtube\.com\/watch\?(?:[^&\s]*&)*v=([a-zA-Z0-9_-]{11})/);
+  let m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
   if (m) return m[1];
-  m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  m = url.match(/youtube\.com\/(?:watch\?.*[?&]v=|shorts\/)([a-zA-Z0-9_-]{11})/);
+  if (m) return m[1];
+  // fallback: ?v= as first param
+  m = url.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/);
   if (m) return m[1];
   return null;
 }
