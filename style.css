@@ -193,6 +193,7 @@ body {
 
 .bd-site-name { font-size: 13px; font-weight: 700; color: #f0ece4; letter-spacing: 0.02em; }
 .bd-site-kana { font-size: 10px; color: #5a6278; letter-spacing: 0.05em; }
+.bd-site-ver  { font-size: 0.7rem; font-weight: 300; color: #9aa0b0; margin-top: 2px; }
 
 #bd-nav-scroll  { flex: 1; overflow-y: auto; padding: 12px 8px; }
 .bd-nav-label   { font-size: 10px; color: #5a6278; letter-spacing: 0.1em; padding: 4px 8px 8px; font-weight: 700; }

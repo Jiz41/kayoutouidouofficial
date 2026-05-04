@@ -1,4 +1,12 @@
 User-agent: *
-Disallow: /admin.html
-Disallow: /admin.js
-Disallow: /admin_setup.sql
+Disallow: /kayoutouidouofficial/admin
+Disallow: /kayoutouidouofficial/#jizairitu
+Disallow: /kayoutouidouofficial/#boards
+Disallow: /kayoutouidouofficial/#threads
+Disallow: /kayoutouidouofficial/#posts
+Disallow: /kayoutouidouofficial/#announcements
+
+Allow: /kayoutouidouofficial/
+Allow: /kayoutouidouofficial/#home
+Allow: /kayoutouidouofficial/#news
+Allow: /kayoutouidouofficial/#links
