@@ -30,11 +30,19 @@ create table if not exists reports (
 alter table bans    enable row level security;
 alter table reports enable row level security;
 
-drop policy if exists "public_all_bans"    on bans;
-drop policy if exists "public_all_reports" on reports;
+-- bans: 匿名は読み取りのみ（insert_post RPCのBANチェックに必要）、書き込みは認証済みのみ
+drop policy if exists "public_all_bans"  on bans;
+drop policy if exists "anon_read_bans"   on bans;
+drop policy if exists "auth_write_bans"  on bans;
+create policy "anon_read_bans"  on bans for select using (true);
+create policy "auth_write_bans" on bans for all to authenticated using (true) with check (true);
 
-create policy "public_all_bans"    on bans    for all using (true) with check (true);
-create policy "public_all_reports" on reports for all using (true) with check (true);
+-- reports: 匿名はINSERTのみ（通報機能）、読み取り・更新・削除は認証済みのみ
+drop policy if exists "public_all_reports"  on reports;
+drop policy if exists "anon_insert_reports" on reports;
+drop policy if exists "auth_write_reports"  on reports;
+create policy "anon_insert_reports" on reports for insert with check (true);
+create policy "auth_write_reports"  on reports for all to authenticated using (true) with check (true);
 
 -- インデックス
 create index if not exists idx_bans_anon_id       on bans(anon_id);

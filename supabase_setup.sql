@@ -32,23 +32,35 @@ create table if not exists posts (
   created_at  timestamptz default now()
 );
 
--- RLS 無効化（パブリックBBS）
-alter table boards  disable row level security;
-alter table threads disable row level security;
-alter table posts   disable row level security;
-
--- ▼ RLS無効化が効かない場合の保険：全操作を許可するポリシーも追加
+-- RLS 有効化
 alter table boards  enable row level security;
 alter table threads enable row level security;
 alter table posts   enable row level security;
 
+-- boards: 匿名は読み取りのみ、書き込みは認証済みユーザーのみ
 drop policy if exists "public_all_boards"  on boards;
-drop policy if exists "public_all_threads" on threads;
-drop policy if exists "public_all_posts"   on posts;
+drop policy if exists "anon_read_boards"   on boards;
+drop policy if exists "auth_write_boards"  on boards;
+create policy "anon_read_boards"  on boards for select using (true);
+create policy "auth_write_boards" on boards for all to authenticated using (true) with check (true);
 
-create policy "public_all_boards"  on boards  for all using (true) with check (true);
-create policy "public_all_threads" on threads for all using (true) with check (true);
-create policy "public_all_posts"   on posts   for all using (true) with check (true);
+-- threads: 匿名は読み取り・INSERT のみ、更新・削除は認証済みユーザーのみ
+drop policy if exists "public_all_threads"   on threads;
+drop policy if exists "anon_read_threads"    on threads;
+drop policy if exists "anon_insert_threads"  on threads;
+drop policy if exists "auth_update_threads"  on threads;
+drop policy if exists "auth_delete_threads"  on threads;
+create policy "anon_read_threads"   on threads for select using (true);
+create policy "anon_insert_threads" on threads for insert with check (true);
+create policy "auth_update_threads" on threads for update to authenticated using (true);
+create policy "auth_delete_threads" on threads for delete to authenticated using (true);
+
+-- posts: 匿名は読み取りのみ、INSERT はRPC経由（security definer）、削除は認証済みのみ
+drop policy if exists "public_all_posts"  on posts;
+drop policy if exists "anon_read_posts"   on posts;
+drop policy if exists "auth_delete_posts" on posts;
+create policy "anon_read_posts"   on posts for select using (true);
+create policy "auth_delete_posts" on posts for delete to authenticated using (true);
 
 -- インデックス
 create index if not exists idx_threads_board_id on threads(board_id);
@@ -92,6 +104,11 @@ declare
   v_num   int;
   v_post  posts;
 begin
+  -- BANチェック
+  if exists (select 1 from bans where anon_id = p_anon_id) then
+    raise exception 'banned';
+  end if;
+
   -- スレッドをロック
   select post_count into v_count
   from threads where id = p_thread_id for update;
