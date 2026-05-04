@@ -148,7 +148,8 @@ function buildNotifBanner() {
   return `<div id="jizairi-notif-banner">
     <span class="jizairi-notif-txt">予想が届いたら、大衛星からお知らせします。</span>
     <button id="jizairi-notif-btn">🔔 通知をオンにする</button>
-  </div>`;
+  </div>
+  <p style="font-size:0.72rem;color:#9aa0b0;margin:6px 16px 0;">真自在律A.L.Lの新着予想通知を受け取るには、PWAのインストールを推奨します。</p>`;
 }
 
 function setupNotifBanner() {
