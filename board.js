@@ -10,11 +10,20 @@ const SUPABASE_URL = 'https://pqqrfzofzxiuzvxdrcai.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_t1AfJtM9h_gYkxg9QL3GXg_-CVV0jaT';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── 匿名ID ────────────────────────────────────────────────
-let myAnonId = localStorage.getItem('kayou_anon_id');
-if (!myAnonId) {
+// ── 匿名ID（24時間でリセット） ───────────────────────────
+const ID_KEY = 'kayou_anon_id';
+const TS_KEY = 'kayou_anon_id_ts';
+const TTL    = 24 * 60 * 60 * 1000;
+
+const storedId = localStorage.getItem(ID_KEY);
+const storedTs = Number(localStorage.getItem(TS_KEY) || 0);
+let myAnonId;
+if (!storedId || Date.now() - storedTs > TTL) {
   myAnonId = Math.random().toString(36).slice(2, 10).toUpperCase();
-  localStorage.setItem('kayou_anon_id', myAnonId);
+  localStorage.setItem(ID_KEY, myAnonId);
+  localStorage.setItem(TS_KEY, String(Date.now()));
+} else {
+  myAnonId = storedId;
 }
 
 // ── アプリ状態 ────────────────────────────────────────────
@@ -384,11 +393,22 @@ function unsubscribe() {
 }
 
 // ── 投稿送信 ──────────────────────────────────────────────
+const LAST_POST_KEY = 'kayou_last_post';
+const INTERVAL_MS   = 30 * 1000;
+
 document.getElementById('bd-form').addEventListener('submit', async e => {
   e.preventDefault();
   const text = bdTextarea.value.trim();
   if (!text && !pendingImages.length) return;
   if (!currentThread?.is_active) return;
+
+  const lastPost = Number(localStorage.getItem(LAST_POST_KEY) || 0);
+  const elapsed  = Date.now() - lastPost;
+  if (elapsed < INTERVAL_MS) {
+    const remain = Math.ceil((INTERVAL_MS - elapsed) / 1000);
+    alert(`連続投稿制限中です（あと${remain}秒）`);
+    return;
+  }
 
   bdSendBtn.disabled   = true;
   bdAttachBtn.disabled = true;
@@ -415,6 +435,7 @@ document.getElementById('bd-form').addEventListener('submit', async e => {
   bdAttachBtn.disabled = false;
 
   if (!error) {
+    localStorage.setItem(LAST_POST_KEY, String(Date.now()));
     bdTextarea.value = '';
     bdTextarea.style.height = 'auto';
     clearPendingImages();
