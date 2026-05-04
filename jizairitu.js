@@ -111,6 +111,11 @@ function urlBase64ToUint8Array(b64) {
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
+function bufToBase64Url(buffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
 async function subscribePush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   try {
@@ -122,12 +127,17 @@ async function subscribePush() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       });
     }
-    const json     = sub.toJSON();
-    const endpoint = json.endpoint;
-    const p256dh   = json.keys?.p256dh;
-    const auth     = json.keys?.auth;
-    if (!endpoint || !p256dh || !auth) return;
-    await sb.from('push_subscriptions').upsert({ endpoint, p256dh, auth }, { onConflict: 'endpoint' });
+    // sub.toJSON().keys は Android Chrome で undefined になるケースがある
+    // getKey() で ArrayBuffer を直接取得して base64url に変換する
+    const endpoint  = sub.endpoint;
+    const p256dhBuf = sub.getKey('p256dh');
+    const authBuf   = sub.getKey('auth');
+    if (!endpoint || !p256dhBuf || !authBuf) return;
+    const p256dh = bufToBase64Url(p256dhBuf);
+    const auth   = bufToBase64Url(authBuf);
+    const { error } = await sb.from('push_subscriptions')
+      .upsert({ endpoint, p256dh, auth }, { onConflict: 'endpoint' });
+    if (error) console.error('[Push] Supabase upsert失敗:', error);
   } catch (e) {
     console.error('[Push] 購読失敗:', e);
   }
