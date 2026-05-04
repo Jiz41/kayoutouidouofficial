@@ -114,15 +114,19 @@ function urlBase64ToUint8Array(b64) {
 async function subscribePush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   try {
-    const reg      = await navigator.serviceWorker.ready;
-    const existing = await reg.pushManager.getSubscription();
-    if (existing) return;
-    const sub = await reg.pushManager.subscribe({
-      userVisibleOnly:      true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-    });
-    const json   = sub.toJSON();
-    const { endpoint, keys: { p256dh, auth } } = json;
+    const reg = await navigator.serviceWorker.ready;
+    let sub   = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly:      true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+    }
+    const json     = sub.toJSON();
+    const endpoint = json.endpoint;
+    const p256dh   = json.keys?.p256dh;
+    const auth     = json.keys?.auth;
+    if (!endpoint || !p256dh || !auth) return;
     await sb.from('push_subscriptions').upsert({ endpoint, p256dh, auth }, { onConflict: 'endpoint' });
   } catch (e) {
     console.error('[Push] 購読失敗:', e);
