@@ -226,6 +226,7 @@ async function showJizairitu() {
   bdBackBtn.style.display    = 'inline-block';
   bdTitle.textContent        = '👁 自在律A.L.L';
   bdMain.innerHTML           = '<div class="bd-loading">読み込み中…</div>';
+  bdMain.scrollTop           = 0;
 
   const [postsRes, logRes] = await Promise.all([
     sb.from('discord_posts').select('*').order('timestamp', { ascending: false }).limit(50),
