@@ -102,7 +102,33 @@
   document.head.appendChild(style);
 })();
 
-// ── ブラウザ通知 ──────────────────────────────────────────
+// ── Web Push（VAPID） ─────────────────────────────────────
+const VAPID_PUBLIC_KEY = 'BBn5SfhmMo1w9AQfnfgkkjbfzbpnZ7yFRJyqODCiNdBejwmDh1MYKgqVifvycND6JGm2CX05dZiQBBZhtLOiHOE';
+
+function urlBase64ToUint8Array(b64) {
+  const pad  = '='.repeat((4 - b64.length % 4) % 4);
+  const raw  = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+async function subscribePush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg      = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) return;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly:      true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+    });
+    const json   = sub.toJSON();
+    const { endpoint, keys: { p256dh, auth } } = json;
+    await sb.from('push_subscriptions').upsert({ endpoint, p256dh, auth }, { onConflict: 'endpoint' });
+  } catch (e) {
+    console.error('[Push] 購読失敗:', e);
+  }
+}
+
 function buildNotifBanner() {
   if (!('Notification' in window) || Notification.permission !== 'default') return '';
   return `<div id="jizairi-notif-banner">
@@ -112,24 +138,18 @@ function buildNotifBanner() {
 }
 
 function setupNotifBanner() {
+  // 既に許可済みなら再購読チェック
+  if ('Notification' in window && Notification.permission === 'granted') {
+    subscribePush();
+  }
   const btn = document.getElementById('jizairi-notif-btn');
   if (!btn) return;
   btn.addEventListener('click', async () => {
     const perm = await Notification.requestPermission();
     if (perm === 'granted') {
       document.getElementById('jizairi-notif-banner')?.remove();
+      await subscribePush();
     }
-  });
-}
-
-async function fireNotif(post) {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  if (!('serviceWorker' in navigator)) return;
-  const reg = await navigator.serviceWorker.ready;
-  reg.showNotification('大衛星', {
-    body: post.title || '新しい予想が届きました',
-    icon: '/kayoutouidouofficial/assets/logo.png',
-    data: { url: '/kayoutouidouofficial/' },
   });
 }
 
@@ -217,7 +237,6 @@ async function showJizairitu() {
     .on('postgres_changes', {
       event: 'INSERT', schema: 'public', table: 'discord_posts',
     }, payload => {
-      fireNotif(payload.new);
       const list = bdMain.querySelector('.jizairi-list');
       if (!list) return;
       const wrapper = document.createElement('div');

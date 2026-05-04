@@ -1,4 +1,4 @@
-const CACHE = 'satellite-v6';
+const CACHE = 'satellite-v7';
 const PRECACHE = [
   '/kayoutouidouofficial/',
   '/kayoutouidouofficial/index.html',
@@ -20,6 +20,19 @@ self.addEventListener('activate', e => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener('push', e => {
+  const data  = e.data ? e.data.json() : {};
+  const title = data.title || '👁 真自在律A.L.L';
+  const body  = data.body  || '大衛星より入電';
+  e.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: '/kayoutouidouofficial/assets/logo.png',
+      data: { url: '/kayoutouidouofficial/' },
+    })
+  );
 });
 
 self.addEventListener('notificationclick', e => {
