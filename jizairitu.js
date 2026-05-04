@@ -73,9 +73,65 @@
       word-break: break-word;
       line-height: 1.55;
     }
+    #jizairi-notif-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #0f1420;
+    }
+    .jizairi-notif-txt {
+      font-size: .82rem;
+      color: #9aa0b0;
+    }
+    #jizairi-notif-btn {
+      font-size: .80rem;
+      font-weight: 600;
+      color: #0f1420;
+      background: #c8a060;
+      border: none;
+      border-radius: 20px;
+      padding: 5px 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #jizairi-notif-btn:active { opacity: .8; }
   `;
   document.head.appendChild(style);
 })();
+
+// ── ブラウザ通知 ──────────────────────────────────────────
+function buildNotifBanner() {
+  if (!('Notification' in window) || Notification.permission !== 'default') return '';
+  return `<div id="jizairi-notif-banner">
+    <span class="jizairi-notif-txt">予想が届いたら、大衛星からお知らせします。</span>
+    <button id="jizairi-notif-btn">🔔 通知をオンにする</button>
+  </div>`;
+}
+
+function setupNotifBanner() {
+  const btn = document.getElementById('jizairi-notif-btn');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      document.getElementById('jizairi-notif-banner')?.remove();
+    }
+  });
+}
+
+async function fireNotif(post) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  if (!('serviceWorker' in navigator)) return;
+  const reg = await navigator.serviceWorker.ready;
+  reg.showNotification('大衛星', {
+    body: post.title || '新しい予想が届きました',
+    icon: '/kayoutouidouofficial/assets/logo.png',
+    data: { url: '/kayoutouidouofficial/' },
+  });
+}
 
 // ── ステータスバー用ヘルパー ──────────────────────────────
 function jstHHMM(isoStr) {
@@ -148,18 +204,20 @@ async function showJizairitu() {
   }
 
   const latestLog = logRes.data && logRes.data.length ? logRes.data[0] : null;
-  const statusHtml = buildStatusBar(latestLog);
+  const statusHtml = buildNotifBanner() + buildStatusBar(latestLog);
 
   if (!postsRes.data || !postsRes.data.length) {
     bdMain.innerHTML = statusHtml + '<div class="bd-empty">予想データがありません</div>';
   } else {
     renderJizairiList(postsRes.data, statusHtml);
   }
+  setupNotifBanner();
 
   realtimeChannel = sb.channel('jizairitu_feed')
     .on('postgres_changes', {
       event: 'INSERT', schema: 'public', table: 'discord_posts',
     }, payload => {
+      fireNotif(payload.new);
       const list = bdMain.querySelector('.jizairi-list');
       if (!list) return;
       const wrapper = document.createElement('div');
