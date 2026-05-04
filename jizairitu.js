@@ -148,8 +148,7 @@ function buildNotifBanner() {
   return `<div id="jizairi-notif-banner">
     <span class="jizairi-notif-txt">予想が届いたら、大衛星からお知らせします。</span>
     <button id="jizairi-notif-btn">🔔 通知をオンにする</button>
-  </div>
-  <p style="font-size:0.72rem;color:#9aa0b0;margin:6px 16px 0;">真自在律A.L.Lの新着予想通知を受け取るには、PWAのインストールを推奨します。</p>`;
+  </div>`;
 }
 
 function setupNotifBanner() {
@@ -239,7 +238,8 @@ async function showJizairitu() {
   }
 
   const latestLog = logRes.data && logRes.data.length ? logRes.data[0] : null;
-  const statusHtml = buildNotifBanner() + buildStatusBar(latestLog);
+  const pwaHint = '<p style="font-size:0.72rem;color:#9aa0b0;margin:6px 16px 0;">真自在律A.L.Lの新着予想通知を受け取るには、PWAのインストールを推奨します。</p>';
+  const statusHtml = buildNotifBanner() + pwaHint + buildStatusBar(latestLog);
 
   if (!postsRes.data || !postsRes.data.length) {
     bdMain.innerHTML = statusHtml + '<div class="bd-empty">予想データがありません</div>';
