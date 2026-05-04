@@ -1,4 +1,4 @@
-const CACHE = 'satellite-v5';
+const CACHE = 'satellite-v6';
 const PRECACHE = [
   '/kayoutouidouofficial/',
   '/kayoutouidouofficial/index.html',
