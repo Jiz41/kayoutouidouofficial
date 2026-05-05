@@ -51,7 +51,6 @@ drop policy if exists "anon_insert_threads"  on threads;
 drop policy if exists "auth_update_threads"  on threads;
 drop policy if exists "auth_delete_threads"  on threads;
 create policy "anon_read_threads"   on threads for select using (true);
-create policy "anon_insert_threads" on threads for insert with check (true);
 create policy "auth_update_threads" on threads for update to authenticated using (true);
 create policy "auth_delete_threads" on threads for delete to authenticated using (true);
 

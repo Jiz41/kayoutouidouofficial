@@ -1,4 +1,4 @@
-const CACHE = 'kayou-0.3.12';
+const CACHE = 'kayou-0.3.13';
 const PRECACHE = [
   '/kayoutouidouofficial/',
   '/kayoutouidouofficial/index.html',
