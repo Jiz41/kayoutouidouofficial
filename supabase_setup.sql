@@ -109,6 +109,16 @@ begin
     raise exception 'banned';
   end if;
 
+  -- 30秒連投チェック
+  if exists (
+    select 1 from posts
+    where anon_id = p_anon_id
+      and created_at > now() - interval '30 seconds'
+    limit 1
+  ) then
+    raise exception '連続投稿制限中です（30秒）';
+  end if;
+
   -- スレッドをロック
   select post_count into v_count
   from threads where id = p_thread_id for update;
