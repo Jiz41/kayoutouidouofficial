@@ -332,12 +332,18 @@ function renderAllPosts() {
   bdMain.querySelectorAll('.bd-post-num').forEach(el => {
     el.addEventListener('click', () => quotePost(Number(el.dataset.num)));
   });
+  bdMain.querySelectorAll('.bd-report-btn').forEach(el => {
+    el.addEventListener('click', () => openReportModal(el.dataset.postId, el.dataset.threadId));
+  });
 }
 
 function renderPost(p, i) {
   const isSystem = p.anon_id === 'SYSTEM';
   const isEmpty  = !p.body || !p.body.trim();
   const sep      = i > 0 ? '<div class="bd-thread-sep"></div>' : '';
+  const reportLink = !isSystem
+    ? `<span class="bd-report-btn" data-post-id="${escHtml(p.id)}" data-thread-id="${escHtml(p.thread_id)}">通報する</span>`
+    : '';
   return `${sep}<div class="bd-post${isSystem ? ' system' : ''}" id="post-${p.post_number}">
     <div class="bd-post-hdr">
       <span class="bd-post-num" data-num="${p.post_number}">${p.post_number}</span>
@@ -345,6 +351,7 @@ function renderPost(p, i) {
       <span class="bd-post-time">${formatDate(p.created_at)}</span>
     </div>
     ${!isEmpty ? `<div class="bd-post-body">${processBody(p.body)}</div>` : ''}
+    ${reportLink}
   </div>`;
 }
 
@@ -370,6 +377,9 @@ function subscribeToThread(threadId) {
 
       postEl.querySelectorAll('.bd-post-num').forEach(e => {
         e.addEventListener('click', () => quotePost(Number(e.dataset.num)));
+      });
+      postEl.querySelectorAll('.bd-report-btn').forEach(e => {
+        e.addEventListener('click', () => openReportModal(e.dataset.postId, e.dataset.threadId));
       });
 
       currentThread.post_count = (currentThread.post_count || 0) + 1;
@@ -717,6 +727,56 @@ function formatDate(iso) {
   const p = n => String(n).padStart(2, '0');
   return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
+
+// ── 通報モーダル ──────────────────────────────────────────
+const bdReportModal  = document.getElementById('bd-report-modal');
+const bdReportReason = document.getElementById('bd-report-reason');
+
+let reportTargetPostId   = null;
+let reportTargetThreadId = null;
+
+function openReportModal(postId, threadId) {
+  reportTargetPostId   = postId;
+  reportTargetThreadId = threadId;
+  bdReportReason.value = '';
+  bdReportModal.classList.add('open');
+  setTimeout(() => bdReportReason.focus(), 50);
+}
+
+function closeReportModal() {
+  bdReportModal.classList.remove('open');
+  reportTargetPostId   = null;
+  reportTargetThreadId = null;
+}
+
+document.getElementById('bd-report-modal-close').addEventListener('click', closeReportModal);
+document.getElementById('bd-report-cancel').addEventListener('click', closeReportModal);
+bdReportModal.addEventListener('click', e => { if (e.target === bdReportModal) closeReportModal(); });
+
+document.getElementById('bd-report-submit').addEventListener('click', async () => {
+  const reason = bdReportReason.value.trim();
+  if (!reason) { alert('理由を入力してください'); return; }
+
+  const submitBtn = document.getElementById('bd-report-submit');
+  submitBtn.disabled = true;
+
+  const { error } = await sb.from('reports').insert({
+    post_id:     reportTargetPostId,
+    thread_id:   reportTargetThreadId,
+    reason,
+    reporter_id: myAnonId,
+  });
+
+  submitBtn.disabled = false;
+
+  if (error) {
+    alert('通報の送信に失敗しました: ' + error.message);
+    return;
+  }
+
+  closeReportModal();
+  alert('通報を受け付けました。ご協力ありがとうございます。');
+});
 
 // ── エントリーポイント ────────────────────────────────────
 window._boardInit = function() { showHome(); };

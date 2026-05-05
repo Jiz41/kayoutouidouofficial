@@ -837,3 +837,96 @@ a.news-item:hover .news-item-title {
 .yt-thumb-wrap:hover .yt-thumb {
   opacity: 1;
 }
+
+/* ── 通報リンク ── */
+.bd-report-btn {
+  display: block;
+  text-align: right;
+  font-size: 0.72rem;
+  color: #9aa0b0;
+  cursor: pointer;
+  padding: 4px 0 2px;
+  user-select: none;
+}
+.bd-report-btn:hover { color: #c8a060; }
+
+/* ── 通報モーダル ── */
+#bd-report-modal {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+  background: rgba(6,10,16,0.82);
+  align-items: center;
+  justify-content: center;
+}
+#bd-report-modal.open { display: flex; }
+#bd-report-modal-box {
+  width: calc(100% - 40px);
+  max-width: 390px;
+  background: #0d1220;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+#bd-report-modal-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 500;
+  color: #f0ece4;
+}
+#bd-report-modal-hdr button {
+  background: none;
+  border: none;
+  color: #5a6278;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+#bd-report-modal-desc {
+  font-size: 12px;
+  color: #7a8090;
+}
+#bd-report-reason {
+  background: #0f1420;
+  border: none;
+  border-radius: 8px;
+  color: #f0ece4;
+  font-size: 13px;
+  font-family: 'Noto Sans JP', sans-serif;
+  padding: 10px 12px;
+  resize: none;
+  outline: none;
+  width: 100%;
+}
+#bd-report-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+#bd-report-cancel {
+  background: none;
+  border: none;
+  color: #5a6278;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+#bd-report-submit {
+  background: #c8a060;
+  border: none;
+  border-radius: 8px;
+  color: #0f1420;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 8px 18px;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+#bd-report-submit:active { opacity: 0.8; }
