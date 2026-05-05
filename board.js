@@ -728,71 +728,108 @@ function formatDate(iso) {
   return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-// ── 通報モーダル ──────────────────────────────────────────
-const bdReportModal = document.getElementById('bd-report-modal');
-const bdReportOther = document.getElementById('bd-report-other');
+// ── 通報モーダル（動的生成・完全削除方式） ───────────────
+const REPORT_REASONS = [
+  '特定個人への攻撃・侮辱・嫌がらせ',
+  '人格・属性を傷つける発言',
+  '他人の個人情報の無断掲載',
+  '差別・ヘイト発言',
+  '違法コンテンツの共有',
+  '政治・宗教の勧誘',
+  '反社会的勢力への利益供与・協力',
+  '脅迫・殺害予告',
+  '無断転載・商用利用',
+  '知的財産権の侵害',
+  '他サービスの宣伝・勧誘',
+  'その他',
+];
 
 let reportTargetPostId   = null;
 let reportTargetThreadId = null;
 
-function openReportModal(postId, threadId) {
-  reportTargetPostId   = postId;
-  reportTargetThreadId = threadId;
-  document.querySelectorAll('input[name="bd-report-reason"]').forEach(r => { r.checked = false; });
-  bdReportOther.value        = '';
-  bdReportOther.style.display = 'none';
-  bdReportModal.classList.add('open');
-}
-
 function closeReportModal() {
-  bdReportModal.classList.remove('open');
+  const m = document.getElementById('bd-report-modal');
+  if (m) m.remove();
   reportTargetPostId   = null;
   reportTargetThreadId = null;
 }
 
-document.getElementById('bd-report-modal-close').addEventListener('click', closeReportModal);
-document.getElementById('bd-report-cancel').addEventListener('click', closeReportModal);
-bdReportModal.addEventListener('click', e => { if (e.target === bdReportModal) closeReportModal(); });
+function openReportModal(postId, threadId) {
+  closeReportModal(); // 念のため既存削除
 
-// 「その他」選択時のみ自由記入欄を表示
-document.querySelectorAll('input[name="bd-report-reason"]').forEach(radio => {
-  radio.addEventListener('change', () => {
-    bdReportOther.style.display = radio.value === 'その他' ? 'block' : 'none';
-    if (radio.value === 'その他') setTimeout(() => bdReportOther.focus(), 50);
+  reportTargetPostId   = postId;
+  reportTargetThreadId = threadId;
+
+  const reasonsHtml = REPORT_REASONS.map(r =>
+    `<label class="bd-report-label">
+      <input type="radio" name="bd-report-reason" value="${escHtml(r)}">
+      <span>${escHtml(r)}</span>
+    </label>`
+  ).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'bd-report-modal';
+  modal.innerHTML = `
+    <div id="bd-report-modal-box">
+      <div id="bd-report-modal-hdr">
+        <span>通報する</span>
+        <button id="bd-report-modal-close">✕</button>
+      </div>
+      <p id="bd-report-modal-desc">該当する理由を選択してください。</p>
+      <div id="bd-report-reasons">${reasonsHtml}</div>
+      <textarea id="bd-report-other" placeholder="詳細を入力…" rows="3" style="display:none"></textarea>
+      <div id="bd-report-modal-actions">
+        <button id="bd-report-cancel">キャンセル</button>
+        <button id="bd-report-submit">送信する</button>
+      </div>
+    </div>`;
+
+  document.getElementById('board-root').appendChild(modal);
+
+  // 「その他」選択時のみ自由記入欄を表示
+  modal.querySelectorAll('input[name="bd-report-reason"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const other = document.getElementById('bd-report-other');
+      other.style.display = radio.value === 'その他' ? 'block' : 'none';
+      if (radio.value === 'その他') setTimeout(() => other.focus(), 50);
+    });
   });
-});
 
-document.getElementById('bd-report-submit').addEventListener('click', async () => {
-  const selected = document.querySelector('input[name="bd-report-reason"]:checked');
-  if (!selected) { alert('理由を選択してください'); return; }
+  document.getElementById('bd-report-modal-close').addEventListener('click', closeReportModal);
+  document.getElementById('bd-report-cancel').addEventListener('click', closeReportModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeReportModal(); });
 
-  let reason = selected.value;
-  if (reason === 'その他') {
-    const other = bdReportOther.value.trim();
-    if (!other) { alert('詳細を入力してください'); return; }
-    reason = 'その他: ' + other;
-  }
+  document.getElementById('bd-report-submit').addEventListener('click', async () => {
+    const selected = modal.querySelector('input[name="bd-report-reason"]:checked');
+    if (!selected) { alert('理由を選択してください'); return; }
 
-  const submitBtn = document.getElementById('bd-report-submit');
-  submitBtn.disabled = true;
+    let reason = selected.value;
+    if (reason === 'その他') {
+      const other = document.getElementById('bd-report-other').value.trim();
+      if (!other) { alert('詳細を入力してください'); return; }
+      reason = 'その他: ' + other;
+    }
 
-  const { error } = await sb.from('reports').insert({
-    post_id:     reportTargetPostId,
-    thread_id:   reportTargetThreadId,
-    reason,
-    reporter_id: myAnonId,
+    const submitBtn = document.getElementById('bd-report-submit');
+    submitBtn.disabled = true;
+
+    const { error } = await sb.from('reports').insert({
+      post_id:     reportTargetPostId,
+      thread_id:   reportTargetThreadId,
+      reason,
+      reporter_id: myAnonId,
+    });
+
+    submitBtn.disabled = false;
+    if (error) { alert('通報の送信に失敗しました: ' + error.message); return; }
+
+    closeReportModal();
+    alert('通報を受け付けました。ご協力ありがとうございます。');
   });
 
-  submitBtn.disabled = false;
-
-  if (error) {
-    alert('通報の送信に失敗しました: ' + error.message);
-    return;
-  }
-
-  closeReportModal();
-  alert('通報を受け付けました。ご協力ありがとうございます。');
-});
+  // 開く（次フレームでアニメーション発火）
+  requestAnimationFrame(() => modal.classList.add('open'));
+}
 
 // ── エントリーポイント ────────────────────────────────────
 window._boardInit = function() { showHome(); };
