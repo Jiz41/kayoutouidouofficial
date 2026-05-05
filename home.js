@@ -180,6 +180,12 @@ const LINKS_DATA = [
     url:     'https://note.com/kytnrnsnjzitr',
     label:   'note で読む',
   },
+  {
+    title:   '号外真自在律 成績一覧＆熱度分布図',
+    desc:    '真自在律（マニュアル版）の予想成績を集計・可視化したデータページです。的中率・回収率・令種別精度・開催場別成績など、蓄積されたデータを多角的に確認することで、真自在律の強みと傾向を把握できます。',
+    url:     'https://jiz41-jiz41r1t5u.static.hf.space/gg_snjzirt.html',
+    label:   'データを見る',
+  },
 ];
 
 function showLinks() {
