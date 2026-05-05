@@ -268,7 +268,7 @@ async function showThreads(board) {
     .from('threads')
     .select('*')
     .eq('board_id', board.id)
-    .order('created_at', { ascending: false });
+    .order('last_posted_at', { ascending: false });
 
   if (error) { bdMain.innerHTML = `<div class="bd-empty">エラー: ${escHtml(error.message)}</div>`; return; }
 
