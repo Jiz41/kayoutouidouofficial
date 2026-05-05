@@ -840,13 +840,12 @@ a.news-item:hover .news-item-title {
 
 /* ── 通報リンク ── */
 .bd-report-btn {
-  display: block;
-  text-align: right;
-  font-size: 0.72rem;
-  color: #9aa0b0;
+  display: inline;
+  font-size: 0.68rem;
+  color: #5a6278;
   cursor: pointer;
-  padding: 4px 0 2px;
   user-select: none;
+  margin-left: 6px;
 }
 .bd-report-btn:hover { color: #c8a060; }
 

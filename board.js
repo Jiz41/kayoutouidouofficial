@@ -346,9 +346,9 @@ function renderPost(p, i) {
       <span class="bd-post-num" data-num="${p.post_number}">${p.post_number}</span>
       <span class="bd-post-id">Anon:${escHtml(p.anon_id)}</span>
       <span class="bd-post-time">${formatDate(p.created_at)}</span>
+      ${reportLink}
     </div>
     ${!isEmpty ? `<div class="bd-post-body">${processBody(p.body)}</div>` : ''}
-    ${reportLink}
   </div>`;
 }
 
