@@ -729,8 +729,8 @@ function formatDate(iso) {
 }
 
 // ── 通報モーダル ──────────────────────────────────────────
-const bdReportModal  = document.getElementById('bd-report-modal');
-const bdReportReason = document.getElementById('bd-report-reason');
+const bdReportModal = document.getElementById('bd-report-modal');
+const bdReportOther = document.getElementById('bd-report-other');
 
 let reportTargetPostId   = null;
 let reportTargetThreadId = null;
@@ -738,9 +738,10 @@ let reportTargetThreadId = null;
 function openReportModal(postId, threadId) {
   reportTargetPostId   = postId;
   reportTargetThreadId = threadId;
-  bdReportReason.value = '';
+  document.querySelectorAll('input[name="bd-report-reason"]').forEach(r => { r.checked = false; });
+  bdReportOther.value        = '';
+  bdReportOther.style.display = 'none';
   bdReportModal.classList.add('open');
-  setTimeout(() => bdReportReason.focus(), 50);
 }
 
 function closeReportModal() {
@@ -753,9 +754,24 @@ document.getElementById('bd-report-modal-close').addEventListener('click', close
 document.getElementById('bd-report-cancel').addEventListener('click', closeReportModal);
 bdReportModal.addEventListener('click', e => { if (e.target === bdReportModal) closeReportModal(); });
 
+// 「その他」選択時のみ自由記入欄を表示
+document.querySelectorAll('input[name="bd-report-reason"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    bdReportOther.style.display = radio.value === 'その他' ? 'block' : 'none';
+    if (radio.value === 'その他') setTimeout(() => bdReportOther.focus(), 50);
+  });
+});
+
 document.getElementById('bd-report-submit').addEventListener('click', async () => {
-  const reason = bdReportReason.value.trim();
-  if (!reason) { alert('理由を入力してください'); return; }
+  const selected = document.querySelector('input[name="bd-report-reason"]:checked');
+  if (!selected) { alert('理由を選択してください'); return; }
+
+  let reason = selected.value;
+  if (reason === 'その他') {
+    const other = bdReportOther.value.trim();
+    if (!other) { alert('詳細を入力してください'); return; }
+    reason = 'その他: ' + other;
+  }
 
   const submitBtn = document.getElementById('bd-report-submit');
   submitBtn.disabled = true;
