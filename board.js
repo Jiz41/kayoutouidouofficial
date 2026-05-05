@@ -394,6 +394,7 @@ function subscribeToThread(threadId) {
 
 function unsubscribe() {
   if (realtimeChannel) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
+  closeReportModal();
 }
 
 // ── 投稿送信 ──────────────────────────────────────────────
@@ -692,8 +693,10 @@ bdMain.addEventListener('click', e => {
   const img = e.target.closest('[data-lb]');
   if (img) openLightbox(img.dataset.lb);
 
-  const reportBtn = e.target.closest('.bd-report-btn');
-  if (reportBtn) openReportModal(reportBtn.dataset.postId, reportBtn.dataset.threadId);
+  if (view === 'posts') {
+    const reportBtn = e.target.closest('.bd-report-btn');
+    if (reportBtn) openReportModal(reportBtn.dataset.postId, reportBtn.dataset.threadId);
+  }
 });
 
 function openLightbox(url) {
