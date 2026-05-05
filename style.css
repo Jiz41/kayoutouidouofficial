@@ -893,9 +893,7 @@ a.news-item:hover .news-item-title {
   color: #7a8090;
 }
 #bd-report-reasons {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  display: block;
   max-height: 260px;
   overflow-y: auto;
 }
@@ -903,11 +901,13 @@ a.news-item:hover .news-item-title {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 4px;
+  width: 100%;
+  padding: 10px 2px;
   border-bottom: 1px solid #1a2236;
   cursor: pointer;
   font-size: 13px;
   color: #ddd6c8;
+  box-sizing: border-box;
 }
 .bd-report-label:last-child { border-bottom: none; }
 .bd-report-label input[type="radio"] {
@@ -917,6 +917,7 @@ a.news-item:hover .news-item-title {
   flex-shrink: 0;
   cursor: pointer;
 }
+.bd-report-label span { flex: 1; line-height: 1.4; }
 #bd-report-other {
   background: #0f1420;
   border: none;

@@ -332,9 +332,6 @@ function renderAllPosts() {
   bdMain.querySelectorAll('.bd-post-num').forEach(el => {
     el.addEventListener('click', () => quotePost(Number(el.dataset.num)));
   });
-  bdMain.querySelectorAll('.bd-report-btn').forEach(el => {
-    el.addEventListener('click', () => openReportModal(el.dataset.postId, el.dataset.threadId));
-  });
 }
 
 function renderPost(p, i) {
@@ -377,9 +374,6 @@ function subscribeToThread(threadId) {
 
       postEl.querySelectorAll('.bd-post-num').forEach(e => {
         e.addEventListener('click', () => quotePost(Number(e.dataset.num)));
-      });
-      postEl.querySelectorAll('.bd-report-btn').forEach(e => {
-        e.addEventListener('click', () => openReportModal(e.dataset.postId, e.dataset.threadId));
       });
 
       currentThread.post_count = (currentThread.post_count || 0) + 1;
@@ -697,6 +691,9 @@ bdFileInput.addEventListener('change', () => {
 bdMain.addEventListener('click', e => {
   const img = e.target.closest('[data-lb]');
   if (img) openLightbox(img.dataset.lb);
+
+  const reportBtn = e.target.closest('.bd-report-btn');
+  if (reportBtn) openReportModal(reportBtn.dataset.postId, reportBtn.dataset.threadId);
 });
 
 function openLightbox(url) {
