@@ -6,7 +6,7 @@ const NEWS_CATEGORIES = [
   { key: '競馬',             label: '競馬' },
   { key: '競艇',             label: '競艇' },
   { key: 'オート',           label: 'オート' },
-  { key: 'パチンコ・スロット', label: 'パチスロ' },
+  { key: 'パチンコ・スロット', label: 'パチ&スロ' },
   { key: 'ネタ・おもしろ',   label: 'ネタ' },
   { key: '一般ニュース',     label: '一般' },
   { key: 'AI・ガジェット',   label: 'AI/ガジェット' },
