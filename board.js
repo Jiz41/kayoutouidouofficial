@@ -102,6 +102,9 @@ function renderBoardsNav() {
   html += `<button class="bd-board-btn${view === 'jizairitu' ? ' active' : ''}" id="bd-jiz-btn">
     <span class="bd-emoji">👁</span><span class="bd-bname">真自在律A.L.L</span>
   </button>`;
+  html += `<button class="bd-board-btn bd-nav-sub${view === 'column' ? ' active' : ''}" id="bd-column-btn">
+    <span class="bd-bname">コード</span>
+  </button>`;
 
   // ── ③ 区切り → ニュース速報 ────────────────────────────
   html += SEP;
@@ -176,7 +179,8 @@ function renderBoardsNav() {
   bdBoardsNav.innerHTML = html;
 
   document.getElementById('bd-home-btn')?.addEventListener('click',  () => { closeSidebar(); showHome(); });
-  document.getElementById('bd-jiz-btn')?.addEventListener('click',   () => { closeSidebar(); showJizairitu(); });
+  document.getElementById('bd-jiz-btn')?.addEventListener('click',    () => { closeSidebar(); showJizairitu(); });
+  document.getElementById('bd-column-btn')?.addEventListener('click', () => { closeSidebar(); showColumn(); });
   document.getElementById('bd-ann-btn')?.addEventListener('click',   () => { closeSidebar(); showAnnouncements(); });
   document.getElementById('bd-links-btn')?.addEventListener('click', () => { closeSidebar(); showLinks(); });
   document.getElementById('bd-news-btn')?.addEventListener('click',  () => { closeSidebar(); showNews(); });
@@ -497,6 +501,7 @@ bdBackBtn.addEventListener('click', () => {
   else if (view === 'announcements') showHome();
   else if (view === 'links')         showHome();
   else if (view === 'news')          showHome();
+  else if (view === 'column')        showHome();
 });
 
 // ── 利用規約 / プライバシーポリシー モーダル ─────────────

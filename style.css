@@ -955,3 +955,114 @@ a.news-item:hover .news-item-title {
   font-family: 'Noto Sans JP', sans-serif;
 }
 #bd-report-submit:active { opacity: 0.8; }
+
+/* ================================================================
+   NAV SUB（インデント子要素）
+================================================================ */
+.bd-nav-sub {
+  padding-left: 40px !important;
+}
+.bd-nav-sub .bd-bname {
+  color: #7a8090;
+  font-size: 12px;
+}
+.bd-nav-sub.active .bd-bname {
+  color: #c8a060;
+}
+
+/* ================================================================
+   COLUMN（設計ノート）
+================================================================ */
+.column-wrap {
+  padding: 0 0 60px;
+  color: #c8cdd8;
+  font-size: 13.5px;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+}
+.column-opening {
+  font-size: 12px;
+  color: #5a6278;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.08em;
+}
+.column-h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #c8a060;
+  letter-spacing: 0.04em;
+  margin-bottom: 0;
+}
+.column-h3 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #c8a060;
+  letter-spacing: 0.03em;
+  margin-bottom: 12px;
+}
+.column-italic {
+  font-style: italic;
+  color: #7a8090;
+  font-size: 12.5px;
+}
+.column-step-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #f0ece4;
+  letter-spacing: 0.05em;
+  margin: 20px 0 6px;
+}
+pre.column-pre {
+  background: #0b0f1a;
+  color: #c8a060;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.7;
+  padding: 12px 14px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 8px 0 14px;
+  border: 1px solid rgba(200,160,96,0.15);
+  white-space: pre;
+}
+pre.column-pre code {
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  border: none;
+}
+code.column-code {
+  background: #0b0f1a;
+  color: #c8a060;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid rgba(200,160,96,0.15);
+}
+.column-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 12px 0 16px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.column-table th {
+  background: rgba(200,160,96,0.1);
+  color: #c8a060;
+  font-weight: 600;
+  padding: 7px 10px;
+  border: 1px solid rgba(200,160,96,0.2);
+  text-align: left;
+}
+.column-table td {
+  padding: 6px 10px;
+  border: 1px solid rgba(255,255,255,0.07);
+  color: #c8cdd8;
+  vertical-align: top;
+}
+.column-table tr:nth-child(even) td {
+  background: rgba(255,255,255,0.02);
+}
