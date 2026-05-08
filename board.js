@@ -103,7 +103,7 @@ function renderBoardsNav() {
     <span class="bd-emoji">👁</span><span class="bd-bname">真自在律A.L.L</span>
   </button>`;
   html += `<button class="bd-board-btn bd-nav-sub${view === 'column' ? ' active' : ''}" id="bd-column-btn">
-    <span class="bd-bname">開発ノート</span>
+    <span class="bd-bname">設計ノート</span>
   </button>`;
 
   // ── ③ 区切り → ニュース速報 ────────────────────────────
