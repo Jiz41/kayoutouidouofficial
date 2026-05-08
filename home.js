@@ -206,12 +206,6 @@ function showColumn() {
 <div class="column-wrap">
 
   <div class="home-section">
-    <p class="column-opening">少々お時間をいただきます。</p>
-  </div>
-
-  <div class="home-divider"></div>
-
-  <div class="home-section">
     <h2 class="column-h2">真・自在律 設計ノート</h2>
   </div>
 
@@ -437,8 +431,6 @@ const TOTAL_ITERATIONS = 1465;</code></pre>
     <p>もしうまくいかなかったら、よしよししてください。</p>
   </div>
 
-  <div class="home-divider"></div>
-  <div class="home-section"><p>クロコへの差し替え指示を出しますか？</p></div>
   <div class="home-divider"></div>
 
   <div class="home-section">
