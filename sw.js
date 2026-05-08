@@ -1,4 +1,4 @@
-const CACHE = 'kayou-1.0.2';
+const CACHE = 'kayou-1.1.4';
 const PRECACHE = [
   '/kayoutouidouofficial/',
   '/kayoutouidouofficial/index.html',
@@ -49,7 +49,22 @@ self.addEventListener('notificationclick', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
-  );
+  const url = new URL(e.request.url);
+  const isAsset = /\.(png|jpg|jpeg|gif|webp|ico|svg|woff2?)$/.test(url.pathname);
+
+  if (isAsset) {
+    // 画像・フォント: cache-first（変更頻度低）
+    e.respondWith(
+      caches.match(e.request).then(cached => cached || fetch(e.request))
+    );
+  } else {
+    // HTML/JS/CSS: network-first（常に最新を取得、失敗時にキャッシュへフォールバック）
+    e.respondWith(
+      caches.open(CACHE).then(cache =>
+        fetch(e.request)
+          .then(res => { cache.put(e.request, res.clone()); return res; })
+          .catch(() => caches.match(e.request))
+      )
+    );
+  }
 });
