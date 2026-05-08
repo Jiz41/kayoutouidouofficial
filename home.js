@@ -420,6 +420,16 @@ const TOTAL_ITERATIONS = 1465;</code></pre>
   </div>
 
   <div class="home-divider"></div>
+  <div class="home-section">
+    <p style="margin-bottom:8px; color:#9aa0b0; font-size:0.85em;">計算の流れを動画でも解説しています。</p>
+    <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; margin-bottom:24px;">
+      <iframe
+        src="https://www.youtube.com/embed/H-4jRPPhWmg"
+        style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
   <div class="home-section"><p class="column-italic">コードの話はここまでです。最後に、これからのことを少しだけ。</p></div>
   <div class="home-divider"></div>
 
