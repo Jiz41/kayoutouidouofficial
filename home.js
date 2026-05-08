@@ -228,14 +228,6 @@ function showColumn() {
   <div class="home-section">
     <h3 class="column-h3">2｜レースデータが買い目になるまで</h3>
     <p><strong>2026年5月3日 西武園4R Aチャレンジ 南4.5m</strong></p>
-    <p style="margin-bottom:8px; color:#9aa0b0; font-size:0.85em;">計算の流れを動画でも解説しています。</p>
-    <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; margin-bottom:24px;">
-      <iframe
-        src="https://www.youtube.com/embed/H-4jRPPhWmg"
-        style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-        allowfullscreen>
-      </iframe>
-    </div>
     <table class="column-table">
       <thead><tr><th>車番</th><th>選手名</th><th>府県</th><th>スタイル</th><th>印</th></tr></thead>
       <tbody>
