@@ -147,13 +147,16 @@ body {
 .footer-text { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--faint); font-family:'IBM Plex Mono',monospace; letter-spacing:0.1em; z-index:10; opacity:0; transition:opacity 1s; }
 .footer-text.visible { opacity:1; }
 @media (orientation: landscape) {
+  #intro { display:none; }
+  .scroll-hint { display:none; }
   .scroll-driver { height:auto; }
-  .sticky-frame { position:relative; height:auto; padding:24px; overflow:visible; }
-  .logo-area { margin-bottom:16px; }
-  .site-name-en { display:none; }
-  .site-tagline { display:none; }
-  .cards { max-width:min(600px, calc(100vw - 48px)); }
-  .card { transform:none !important; opacity:1 !important; }
+  .sticky-frame { position:relative; height:auto; overflow:visible; padding:32px 24px; justify-content:flex-start; }
+  .logo-area { margin-bottom:24px; }
+  .cards { max-width:min(600px, calc(100vw - 48px)); gap:12px; }
+  .card { transform:none !important; opacity:1 !important; padding:16px 18px; }
+  .card-name { font-size:13px; }
+  .card-desc { font-size:10px; }
+  .tag { font-size:9px; }
 }
 </style>
 </head>
@@ -297,6 +300,16 @@ window.addEventListener('scroll',()=>{
   });
   if(step<1)document.querySelectorAll('.progress-dot').forEach((d,i)=>d.classList.toggle('active',i===0));
 });
+
+const CARDS_ALL=['c0','c1','c2','c3','c4','c5'];
+function initLandscape(){
+  if(!window.matchMedia('(orientation: landscape)').matches)return;
+  document.getElementById('logoArea').classList.add('visible');
+  document.getElementById('footerText').classList.add('visible');
+  CARDS_ALL.forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('visible');el.dataset.shown='1';}});
+}
+initLandscape();
+window.addEventListener('orientationchange',()=>setTimeout(initLandscape,300));
 
 document.querySelectorAll('.card').forEach(card=>{
   card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-0.5,y=(e.clientY-r.top)/r.height-0.5;card.style.transform=`perspective(400px) rotateY(${x*8}deg) rotateX(${-y*5}deg) scale(1.02)`;});
