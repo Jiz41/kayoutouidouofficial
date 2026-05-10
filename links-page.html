@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>華耀東夷堂</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@200;300;400;500&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg: #0f1420;
+  --bg2: #060a10;
+  --amber: #c8a060;
+  --amber-dark: #8a6a3a;
+  --text: #f0ece4;
+  --text-sub: #9aa0b0;
+  --faint: #3a4058;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg2);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  overflow-x: hidden;
+}
+#starfield { position:fixed; inset:0; z-index:0; pointer-events:none; }
+#particles { position:fixed; inset:0; z-index:1; pointer-events:none; }
+#intro {
+  position:fixed; inset:0; z-index:50;
+  background:var(--bg2);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  transition:opacity 1.2s ease, visibility 1.2s;
+}
+#intro.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+.intro-orbit { width:120px; height:120px; position:relative; margin-bottom:32px; }
+.intro-ring {
+  position:absolute; inset:0; border-radius:50%;
+  border:1px solid rgba(200,160,96,0.3);
+  animation:spinRing 8s linear infinite;
+}
+.intro-ring:nth-child(2) { inset:12px; border-color:rgba(200,160,96,0.2); animation-duration:5s; animation-direction:reverse; }
+.intro-ring:nth-child(3) { inset:24px; border-color:rgba(200,160,96,0.4); animation-duration:12s; }
+.intro-dot {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:12px; height:12px; border-radius:50%;
+  background:var(--amber);
+  box-shadow:0 0 20px var(--amber),0 0 40px rgba(200,160,96,0.3);
+  animation:dotPulse 2s ease-in-out infinite;
+}
+@keyframes spinRing { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes dotPulse {
+  0%,100%{box-shadow:0 0 20px var(--amber),0 0 40px rgba(200,160,96,0.3)}
+  50%{box-shadow:0 0 30px var(--amber),0 0 60px rgba(200,160,96,0.5)}
+}
+.intro-text {
+  font-size:11px; letter-spacing:0.4em; color:var(--amber);
+  font-family:'IBM Plex Mono',monospace;
+  animation:blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.scroll-driver { height:700vh; position:relative; z-index:1; }
+.sticky-frame {
+  position:sticky; top:0; height:100vh;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  overflow:hidden; padding:0 24px;
+}
+.logo-area {
+  text-align:center; margin-bottom:32px;
+  opacity:0; transform:translateY(-30px) scale(0.9);
+  transition:opacity 1s ease, transform 1s cubic-bezier(0.16,1,0.3,1);
+}
+.logo-area.visible { opacity:1; transform:translateY(0) scale(1); }
+.logo-orbit { width:88px; height:88px; position:relative; margin:0 auto 18px; }
+.logo-ring-outer {
+  position:absolute; inset:0; border-radius:50%;
+  border:1px solid rgba(200,160,96,0.25);
+  animation:spinRing 15s linear infinite;
+}
+.logo-ring-outer::before {
+  content:''; position:absolute; top:-3px; left:50%;
+  width:6px; height:6px; border-radius:50%;
+  background:var(--amber); transform:translateX(-50%);
+  box-shadow:0 0 8px var(--amber);
+}
+.logo-ring-mid {
+  position:absolute; inset:10px; border-radius:50%;
+  border:1px solid rgba(200,160,96,0.15);
+  animation:spinRing 10s linear infinite reverse;
+}
+.logo-core {
+  position:absolute; inset:22px; border-radius:50%;
+  background:radial-gradient(circle,rgba(200,160,96,0.15) 0%,transparent 70%);
+  display:flex; align-items:center; justify-content:center; font-size:22px;
+  border:1px solid rgba(200,160,96,0.35);
+  animation:corePulse 3s ease-in-out infinite;
+}
+@keyframes corePulse {
+  0%,100%{box-shadow:0 0 15px rgba(200,160,96,0.2)}
+  50%{box-shadow:0 0 30px rgba(200,160,96,0.4),inset 0 0 20px rgba(200,160,96,0.1)}
+}
+.site-name { font-size:14px; letter-spacing:0.35em; color:var(--amber); font-weight:300; }
+.site-name-en { font-size:9px; color:var(--text-sub); letter-spacing:0.3em; margin-top:4px; font-family:'IBM Plex Mono',monospace; }
+.site-tagline { font-size:10px; color:rgba(154,160,176,0.6); letter-spacing:0.1em; margin-top:8px; }
+.cards { display:flex; flex-direction:column; gap:10px; width:100%; max-width:360px; }
+.card {
+  display:flex; align-items:center; gap:14px; padding:16px 18px;
+  background:rgba(15,20,32,0.8);
+  border:1px solid rgba(200,160,96,0.12); border-left:2px solid var(--faint);
+  text-decoration:none; color:var(--text); position:relative; overflow:hidden;
+  transform:translateX(140px) skewX(-3deg); opacity:0;
+  transition:transform 0.65s cubic-bezier(0.16,1,0.3,1),opacity 0.5s ease,border-color 0.3s,background 0.3s;
+  backdrop-filter:blur(8px); cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.card::before {
+  content:''; position:absolute; top:0; left:-100%; width:60%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(200,160,96,0.12),transparent);
+  pointer-events:none;
+}
+.card.shine::before { left:150%; transition:left 0.6s ease; }
+.card.visible { transform:translateX(0) skewX(0deg); opacity:1; }
+.card:hover,.card:active { border-left-color:var(--amber); background:rgba(200,160,96,0.06); border-color:rgba(200,160,96,0.25); }
+.card-icon-wrap {
+  width:40px; height:40px; border-radius:50%;
+  border:1px solid rgba(200,160,96,0.2);
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+  flex-shrink:0; background:rgba(200,160,96,0.04);
+  transition:border-color 0.3s,background 0.3s;
+}
+.card:hover .card-icon-wrap { border-color:rgba(200,160,96,0.5); background:rgba(200,160,96,0.1); }
+.card-body { flex:1; min-width:0; }
+.card-name { font-size:13px; font-weight:500; letter-spacing:0.08em; }
+.card-desc { font-size:10px; color:var(--text-sub); margin-top:3px; line-height:1.6; letter-spacing:0.03em; }
+.card-tags { display:flex; gap:4px; margin-top:6px; flex-wrap:wrap; }
+.tag { font-size:9px; padding:2px 7px; border:1px solid rgba(200,160,96,0.2); color:rgba(200,160,96,0.7); letter-spacing:0.05em; font-family:'IBM Plex Mono',monospace; }
+.card-arrow { font-size:14px; color:var(--amber-dark); flex-shrink:0; transition:color 0.3s,transform 0.3s; font-family:'IBM Plex Mono',monospace; }
+.card:hover .card-arrow { color:var(--amber); transform:translateX(4px); }
+.progress-track { position:fixed; right:16px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:8px; z-index:10; }
+.progress-dot { width:4px; height:4px; border-radius:50%; background:var(--faint); transition:background 0.4s,transform 0.4s; }
+.progress-dot.active { background:var(--amber); transform:scale(1.5); box-shadow:0 0 6px var(--amber); }
+.progress-bar { position:fixed; bottom:0; left:0; height:1px; background:linear-gradient(90deg,var(--amber-dark),var(--amber)); z-index:100; width:0%; transition:width 0.05s linear; opacity:0.6; }
+.scroll-hint { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); font-size:9px; letter-spacing:0.35em; color:var(--text-sub); font-family:'IBM Plex Mono',monospace; z-index:10; transition:opacity 0.5s; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.scroll-hint-line { width:1px; height:20px; background:linear-gradient(to bottom,var(--amber),transparent); animation:scrollLine 1.5s ease-in-out infinite; }
+@keyframes scrollLine { 0%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} 51%{transform:scaleY(1);transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
+.footer-text { position:fixed; bottom:12px; right:16px; font-size:9px; color:var(--faint); font-family:'IBM Plex Mono',monospace; letter-spacing:0.1em; z-index:10; opacity:0; transition:opacity 1s; }
+.footer-text.visible { opacity:1; }
+</style>
+</head>
+<body>
+<div id="intro">
+  <div class="intro-orbit">
+    <div class="intro-ring"></div>
+    <div class="intro-ring"></div>
+    <div class="intro-ring"></div>
+    <div class="intro-dot"></div>
+  </div>
+  <div class="intro-text">INITIALIZING...</div>
+</div>
+<canvas id="starfield"></canvas>
+<canvas id="particles"></canvas>
+<div class="progress-bar" id="progressBar"></div>
+<div class="scroll-hint" id="scrollHint"><span>SCROLL</span><div class="scroll-hint-line"></div></div>
+<div class="footer-text" id="footerText">KAYŌ TŌIDŌ · 華耀東夷堂</div>
+<div class="progress-track">
+  <div class="progress-dot active" id="dot0"></div>
+  <div class="progress-dot" id="dot1"></div>
+  <div class="progress-dot" id="dot2"></div>
+  <div class="progress-dot" id="dot3"></div>
+  <div class="progress-dot" id="dot4"></div>
+  <div class="progress-dot" id="dot5"></div>
+</div>
+<div class="scroll-driver">
+  <div class="sticky-frame">
+    <div class="logo-area" id="logoArea">
+      <div class="logo-orbit">
+        <div class="logo-ring-outer"></div>
+        <div class="logo-ring-mid"></div>
+        <div class="logo-core">🛰</div>
+      </div>
+      <div class="site-name">華耀東夷堂</div>
+      <div class="site-name-en">KAYŌ TŌIDŌ</div>
+      <div class="site-tagline">物理的な計算をいっぱいしてるだけ</div>
+    </div>
+    <div class="cards" id="cardsContainer">
+      <a href="https://jiz41.github.io/kayoutouidouofficial/" class="card" id="c0">
+        <div class="card-icon-wrap">🛰</div>
+        <div class="card-body">
+          <div class="card-name">華耀大衛星</div>
+          <div class="card-desc">華耀東夷堂公式サイト。名前も素性もいらない。発言だけが存在する競輪匿名掲示板。自動予想システム A.L.L 搭載。</div>
+          <div class="card-tags"><span class="tag">公式</span><span class="tag">掲示板</span><span class="tag">匿名</span><span class="tag">A.L.L</span></div>
+        </div>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u" class="card" id="c1">
+        <div class="card-icon-wrap">👁</div>
+        <div class="card-body">
+          <div class="card-name">真自在律</div>
+          <div class="card-desc">物理的な計算をいっぱいしてるだけ。統計じゃない、物理学で競輪を読む予想計算機。</div>
+          <div class="card-tags"><span class="tag">予想</span><span class="tag">物理演算</span><span class="tag">無料</span></div>
+        </div>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="https://x.gd/ABm3A" class="card" id="c2">
+        <div class="card-icon-wrap">🦋</div>
+        <div class="card-body">
+          <div class="card-name">Bluesky</div>
+          <div class="card-desc">何かあった時の避難所。競輪・予想・制作物をゆるく発信。</div>
+          <div class="card-tags"><span class="tag">避難所</span><span class="tag">SNS</span></div>
+        </div>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="https://rb.gy/oe7wet" class="card" id="c3">
+        <div class="card-icon-wrap">✉</div>
+        <div class="card-body">
+          <div class="card-name">マシュマロ</div>
+          <div class="card-desc">匿名でご意見・ご感想をどうぞ。なんでも送ってください。</div>
+          <div class="card-tags"><span class="tag">匿名</span><span class="tag">ご意見</span></div>
+        </div>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="https://x.com/kayoutouidou01" class="card" id="c4">
+        <div class="card-icon-wrap">🐦</div>
+        <div class="card-body">
+          <div class="card-name">X</div>
+          <div class="card-desc">ムシン本人のアカウント。予想・購入スクショ・日常を毎日投稿。</div>
+          <div class="card-tags"><span class="tag">予想</span><span class="tag">毎日更新</span></div>
+        </div>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="https://note.com/kytnrnsnjzitr" class="card" id="c5">
+        <div class="card-icon-wrap">📝</div>
+        <div class="card-body">
+          <div class="card-name">note</div>
+          <div class="card-desc">華耀東夷堂の記事・考察・制作ノート。</div>
+          <div class="card-tags"><span class="tag">記事</span><span class="tag">考察</span></div>
+        </div>
+        <span class="card-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</div>
+<script>
+const sc=document.getElementById('starfield'),sctx=sc.getContext('2d');
+let stars=[],shootingStars=[];
+function resizeStar(){sc.width=window.innerWidth;sc.height=window.innerHeight;}
+function initStars(){
+  resizeStar();stars=[];shootingStars=[];
+  const W=sc.width,H=sc.height,count=Math.floor((W*H*0.9)/1400);
+  for(let i=0;i<count;i++) stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()<0.8?Math.random()*0.8+0.3:Math.random()*1.4+0.5,a:Math.random()*0.7+0.1,da:(Math.random()*0.005+0.001)*(Math.random()<0.5?1:-1),amber:Math.random()>0.87});
+  stars.push({x:W*0.85,y:20,r:2.8,a:0.9,da:0,red:true});
+}
+function spawnShoot(){const W=sc.width,H=sc.height;shootingStars.push({x:Math.random()*W*0.6+W*0.2,y:Math.random()*H*0.4,vx:-(Math.random()*3+1.5),vy:Math.random()*1.2+0.3,len:Math.random()*80+40,life:1});}
+setInterval(()=>spawnShoot(),Math.random()*800+400);
+function drawStarfield(){
+  sctx.clearRect(0,0,sc.width,sc.height);
+  stars.forEach(s=>{s.a+=s.da;if(s.a>0.95||s.a<0.05)s.da*=-1;sctx.beginPath();sctx.arc(s.x,s.y,s.r,0,Math.PI*2);sctx.fillStyle=s.red?`rgba(210,55,45,${s.a})`:s.amber?`rgba(200,160,96,${s.a})`:`rgba(240,236,228,${s.a})`;sctx.fill();});
+  shootingStars=shootingStars.filter(s=>s.life>0);
+  shootingStars.forEach(s=>{s.x+=s.vx;s.y+=s.vy;s.life-=0.018;const g=sctx.createLinearGradient(s.x,s.y,s.x-s.vx*(s.len/3),s.y-s.vy*(s.len/3));g.addColorStop(0,`rgba(240,236,228,${s.life*0.9})`);g.addColorStop(1,'transparent');sctx.beginPath();sctx.moveTo(s.x,s.y);sctx.lineTo(s.x-s.vx*(s.len/3),s.y-s.vy*(s.len/3));sctx.strokeStyle=g;sctx.lineWidth=1;sctx.stroke();});
+  requestAnimationFrame(drawStarfield);
+}
+initStars();drawStarfield();window.addEventListener('resize',initStars);
+
+const pc=document.getElementById('particles'),pctx=pc.getContext('2d');
+let particles=[];
+function resizeP(){pc.width=window.innerWidth;pc.height=window.innerHeight;}
+resizeP();window.addEventListener('resize',resizeP);
+function spawnParticles(x,y){for(let i=0;i<12;i++){const a=(Math.PI*2/12)*i+Math.random()*0.5,spd=Math.random()*2+0.5;particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,r:Math.random()*2+0.5,life:1,amber:Math.random()>0.4});}}
+function drawParticles(){pctx.clearRect(0,0,pc.width,pc.height);particles=particles.filter(p=>p.life>0);particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.05;p.life-=0.025;pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);pctx.fillStyle=p.amber?`rgba(200,160,96,${p.life})`:`rgba(240,236,228,${p.life*0.7})`;pctx.fill();});requestAnimationFrame(drawParticles);}
+drawParticles();
+
+setTimeout(()=>{document.getElementById('intro').classList.add('hidden');setTimeout(()=>{document.getElementById('logoArea').classList.add('visible');document.getElementById('footerText').classList.add('visible');},400);},2200);
+
+const CARDS=['c0','c1','c2','c3','c4','c5'],shownCards=new Set();
+window.addEventListener('scroll',()=>{
+  const scrollY=window.scrollY,maxScroll=document.body.scrollHeight-window.innerHeight,ratio=scrollY/maxScroll;
+  document.getElementById('progressBar').style.width=(ratio*100)+'%';
+  document.getElementById('scrollHint').style.opacity=scrollY>80?'0':'1';
+  const cardRatio=Math.min(ratio/0.85,1),step=cardRatio*CARDS.length;
+  CARDS.forEach((id,i)=>{
+    const el=document.getElementById(id);if(!el)return;
+    if(i<step){
+      if(!shownCards.has(id)){shownCards.add(id);el.style.transitionDelay=(i*0.1)+'s';el.classList.add('visible');setTimeout(()=>{const r=el.getBoundingClientRect();spawnParticles(r.left+20,r.top+r.height/2);el.classList.add('shine');setTimeout(()=>el.classList.remove('shine'),700);},i*100+200);}
+      document.querySelectorAll('.progress-dot').forEach((d,di)=>d.classList.toggle('active',di===i+1||(i===CARDS.length-1&&di===CARDS.length)));
+      if(i===0)document.getElementById('dot0').classList.remove('active');
+    } else {el.classList.remove('visible');shownCards.delete(id);el.style.transitionDelay='0s';}
+  });
+  if(step<1)document.querySelectorAll('.progress-dot').forEach((d,i)=>d.classList.toggle('active',i===0));
+});
+
+document.querySelectorAll('.card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-0.5,y=(e.clientY-r.top)/r.height-0.5;card.style.transform=`perspective(400px) rotateY(${x*8}deg) rotateX(${-y*5}deg) scale(1.02)`;});
+  card.addEventListener('mouseleave',()=>card.style.transform='');
+  card.addEventListener('touchmove',e=>{const r=card.getBoundingClientRect(),x=(e.touches[0].clientX-r.left)/r.width-0.5,y=(e.touches[0].clientY-r.top)/r.height-0.5;card.style.transform=`perspective(400px) rotateY(${x*8}deg) rotateX(${-y*5}deg) scale(1.02)`;},{passive:true});
+  card.addEventListener('touchend',()=>card.style.transform='');
+});
+</script>
+</body>
+</html>
