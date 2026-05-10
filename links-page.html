@@ -149,14 +149,16 @@ body {
 @media (orientation: landscape) {
   #intro { display:none; }
   .scroll-hint { display:none; }
+  .progress-track { display:none; }
+  .progress-bar { display:none; }
   .scroll-driver { height:auto; }
-  .sticky-frame { position:relative; height:auto; overflow:visible; padding:32px 24px; justify-content:flex-start; }
+  .sticky-frame { position:relative; height:auto; overflow:visible; padding:32px 24px 48px; }
+  .cards { max-width:min(600px, calc(100vw - 48px)); max-height:none; overflow-y:visible; gap:14px; }
+  .card,.card.visible,.card.shine { transform:none !important; opacity:1 !important; padding:18px 20px; transition:border-color 0.3s,background 0.3s !important; }
+  .card-name { font-size:14px; }
+  .card-desc { font-size:10px; line-height:1.7; }
+  .card-icon-wrap { width:40px; height:40px; font-size:18px; }
   .logo-area { margin-bottom:24px; }
-  .cards { max-width:min(600px, calc(100vw - 48px)); gap:12px; }
-  .card { transform:none !important; opacity:1 !important; padding:16px 18px; }
-  .card-name { font-size:13px; }
-  .card-desc { font-size:10px; }
-  .tag { font-size:9px; }
 }
 </style>
 </head>
@@ -312,9 +314,9 @@ initLandscape();
 window.addEventListener('orientationchange',()=>setTimeout(initLandscape,300));
 
 document.querySelectorAll('.card').forEach(card=>{
-  card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-0.5,y=(e.clientY-r.top)/r.height-0.5;card.style.transform=`perspective(400px) rotateY(${x*8}deg) rotateX(${-y*5}deg) scale(1.02)`;});
+  card.addEventListener('mousemove',e=>{if(window.matchMedia('(orientation: landscape)').matches)return;const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-0.5,y=(e.clientY-r.top)/r.height-0.5;card.style.transform=`perspective(400px) rotateY(${x*8}deg) rotateX(${-y*5}deg) scale(1.02)`;});
   card.addEventListener('mouseleave',()=>card.style.transform='');
-  card.addEventListener('touchmove',e=>{const r=card.getBoundingClientRect(),x=(e.touches[0].clientX-r.left)/r.width-0.5,y=(e.touches[0].clientY-r.top)/r.height-0.5;card.style.transform=`perspective(400px) rotateY(${x*8}deg) rotateX(${-y*5}deg) scale(1.02)`;},{passive:true});
+  card.addEventListener('touchmove',e=>{if(window.matchMedia('(orientation: landscape)').matches)return;const r=card.getBoundingClientRect(),x=(e.touches[0].clientX-r.left)/r.width-0.5,y=(e.touches[0].clientY-r.top)/r.height-0.5;card.style.transform=`perspective(400px) rotateY(${x*8}deg) rotateX(${-y*5}deg) scale(1.02)`;},{passive:true});
   card.addEventListener('touchend',()=>card.style.transform='');
 });
 </script>
