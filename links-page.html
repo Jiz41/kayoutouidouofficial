@@ -62,7 +62,7 @@ body {
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 .scroll-driver { height:1100vh; position:relative; z-index:1; }
 .sticky-frame {
-  position:sticky; top:0; height:100vh;
+  position:sticky; top:0; height:100dvh; min-height:600px;
   display:flex; flex-direction:column;
   align-items:center; justify-content:flex-start;
   overflow-y:auto; overflow-x:hidden; padding:16px 24px 16px;
@@ -73,7 +73,7 @@ body {
   transition:opacity 1s ease, transform 1s cubic-bezier(0.16,1,0.3,1);
 }
 .logo-area.visible { opacity:1; transform:translateY(0) scale(1); }
-.logo-orbit { width:64px; height:64px; position:relative; margin:0 auto 18px; }
+.logo-orbit { width:clamp(56px, 10vw, 88px); height:clamp(56px, 10vw, 88px); position:relative; margin:0 auto 18px; }
 .logo-ring-outer {
   position:absolute; inset:0; border-radius:50%;
   border:1px solid rgba(200,160,96,0.25);
@@ -104,7 +104,7 @@ body {
 .site-name { font-size:12px; letter-spacing:0.35em; color:var(--amber); font-weight:300; }
 .site-name-en { font-size:8px; color:var(--text-sub); letter-spacing:0.3em; margin-top:2px; font-family:'IBM Plex Mono',monospace; }
 .site-tagline { font-size:9px; color:rgba(154,160,176,0.6); letter-spacing:0.1em; margin-top:4px; }
-.cards { display:flex; flex-direction:column; gap:8px; width:100%; max-width:360px; max-height:calc(100vh - 280px); overflow-y:auto; padding-bottom:20px; }
+.cards { display:flex; flex-direction:column; gap:8px; width:100%; max-width:min(480px, calc(100vw - 48px)); max-height:calc(100vh - 280px); overflow-y:auto; padding-bottom:20px; }
 .card {
   display:flex; align-items:center; gap:10px; padding:12px 14px;
   background:rgba(15,20,32,0.8);
