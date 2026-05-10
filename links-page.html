@@ -146,6 +146,15 @@ body {
 @keyframes scrollLine { 0%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} 51%{transform:scaleY(1);transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
 .footer-text { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--faint); font-family:'IBM Plex Mono',monospace; letter-spacing:0.1em; z-index:10; opacity:0; transition:opacity 1s; }
 .footer-text.visible { opacity:1; }
+@media (orientation: landscape) {
+  .scroll-driver { height:auto; }
+  .sticky-frame { position:relative; height:auto; padding:24px; overflow:visible; }
+  .logo-area { margin-bottom:16px; }
+  .site-name-en { display:none; }
+  .site-tagline { display:none; }
+  .cards { max-width:min(600px, calc(100vw - 48px)); }
+  .card { transform:none !important; opacity:1 !important; }
+}
 </style>
 </head>
 <body>
