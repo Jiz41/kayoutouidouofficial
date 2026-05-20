@@ -184,6 +184,7 @@ body {
   <div class="progress-dot" id="dot3"></div>
   <div class="progress-dot" id="dot4"></div>
   <div class="progress-dot" id="dot5"></div>
+  <div class="progress-dot" id="dot6"></div>
 </div>
 <div class="scroll-driver">
   <div class="sticky-frame">
@@ -252,6 +253,15 @@ body {
         </div>
         <span class="card-arrow">→</span>
       </a>
+      <a href="https://jiz41.github.io/mon-delicieux/" class="card" id="c6">
+        <div class="card-icon-wrap">🍽️</div>
+        <div class="card-body">
+          <div class="card-name">Mon Délicieux</div>
+          <div class="card-desc">ごちそうさまの記録。食事の店・料理・うまみ度・写真をカレンダー形式で残せるPWAアプリ。</div>
+          <div class="card-tags"><span class="tag">食事記録</span><span class="tag">PWA</span><span class="tag">無料</span></div>
+        </div>
+        <span class="card-arrow">→</span>
+      </a>
     </div>
   </div>
 </div>
@@ -286,7 +296,7 @@ drawParticles();
 
 setTimeout(()=>{document.getElementById('intro').classList.add('hidden');setTimeout(()=>{document.getElementById('logoArea').classList.add('visible');document.getElementById('footerText').classList.add('visible');},400);},2200);
 
-const CARDS=['c0','c1','c2','c3','c4','c5'],shownCards=new Set();
+const CARDS=['c0','c1','c2','c3','c4','c5','c6'],shownCards=new Set();
 window.addEventListener('scroll',()=>{
   const scrollY=window.scrollY,maxScroll=document.body.scrollHeight-window.innerHeight,ratio=scrollY/maxScroll;
   document.getElementById('progressBar').style.width=(ratio*100)+'%';
@@ -303,7 +313,7 @@ window.addEventListener('scroll',()=>{
   if(step<1)document.querySelectorAll('.progress-dot').forEach((d,i)=>d.classList.toggle('active',i===0));
 });
 
-const CARDS_ALL=['c0','c1','c2','c3','c4','c5'];
+const CARDS_ALL=['c0','c1','c2','c3','c4','c5','c6'];
 function initLandscape(){
   if(!window.matchMedia('(orientation: landscape)').matches)return;
   document.getElementById('logoArea').classList.add('visible');
