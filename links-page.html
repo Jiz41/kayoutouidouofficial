@@ -65,15 +65,15 @@ body {
   position:sticky; top:0; height:100dvh; min-height:600px;
   display:flex; flex-direction:column;
   align-items:center; justify-content:flex-start;
-  overflow:hidden; padding:16px 24px 16px;
+  overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px 24px 16px;
 }
 .logo-area {
-  text-align:center; margin-bottom:12px;
+  text-align:center; margin-bottom:clamp(6px,1dvh,12px);
   opacity:0; transform:translateY(-30px) scale(0.9);
   transition:opacity 1s ease, transform 1s cubic-bezier(0.16,1,0.3,1);
 }
 .logo-area.visible { opacity:1; transform:translateY(0) scale(1); }
-.logo-orbit { width:clamp(56px, 10vw, 88px); height:clamp(56px, 10vw, 88px); position:relative; margin:0 auto 18px; }
+.logo-orbit { width:clamp(44px,8dvh,80px); height:clamp(44px,8dvh,80px); position:relative; margin:0 auto clamp(8px,1.5dvh,18px); }
 .logo-ring-outer {
   position:absolute; inset:0; border-radius:50%;
   border:1px solid rgba(200,160,96,0.25);
@@ -101,12 +101,12 @@ body {
   0%,100%{box-shadow:0 0 15px rgba(200,160,96,0.2)}
   50%{box-shadow:0 0 30px rgba(200,160,96,0.4),inset 0 0 20px rgba(200,160,96,0.1)}
 }
-.site-name { font-size:12px; letter-spacing:0.35em; color:var(--amber); font-weight:300; }
-.site-name-en { font-size:8px; color:var(--text-sub); letter-spacing:0.3em; margin-top:2px; font-family:'IBM Plex Mono',monospace; }
-.site-tagline { font-size:9px; color:rgba(154,160,176,0.6); letter-spacing:0.1em; margin-top:4px; }
+.site-name { font-size:clamp(9px,1.5dvh,12px); letter-spacing:0.35em; color:var(--amber); font-weight:300; }
+.site-name-en { font-size:clamp(7px,1.1dvh,8px); color:var(--text-sub); letter-spacing:0.3em; margin-top:2px; font-family:'IBM Plex Mono',monospace; }
+.site-tagline { font-size:clamp(7px,1.1dvh,9px); color:rgba(154,160,176,0.6); letter-spacing:0.1em; margin-top:clamp(2px,0.5dvh,4px); }
 .cards { display:flex; flex-direction:column; gap:8px; width:100%; max-width:min(480px, calc(100vw - 48px)); flex:1; min-height:0; overflow-y:auto; padding-bottom:20px; }
 .card {
-  display:flex; align-items:flex-start; gap:12px; padding:14px 16px;
+  display:flex; align-items:flex-start; gap:12px; padding:clamp(8px,1.2dvh,14px) 16px;
   background:rgba(15,20,32,0.8);
   border:1px solid rgba(200,160,96,0.12); border-left:2px solid var(--faint);
   text-decoration:none; color:var(--text); position:relative; overflow:hidden;
@@ -132,9 +132,9 @@ body {
 }
 .card:hover .card-icon-wrap { border-color:rgba(200,160,96,0.5); background:rgba(200,160,96,0.1); }
 .card-body { flex:1; min-width:0; }
-.card-name { font-size:13px; font-weight:500; letter-spacing:0.08em; }
-.card-desc { font-size:9px; color:var(--text-sub); margin-top:4px; line-height:1.6; letter-spacing:0.03em; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-.card-tags { display:flex; gap:3px; margin-top:4px; flex-wrap:wrap; }
+.card-name { font-size:clamp(11px,1.8dvh,13px); font-weight:500; letter-spacing:0.08em; }
+.card-desc { font-size:clamp(8px,1.2dvh,9px); color:var(--text-sub); margin-top:clamp(2px,0.5dvh,4px); line-height:1.6; letter-spacing:0.03em; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.card-tags { display:flex; gap:3px; margin-top:clamp(2px,0.5dvh,4px); flex-wrap:wrap; }
 .tag { font-size:8px; padding:1px 5px; border:1px solid rgba(200,160,96,0.2); color:rgba(200,160,96,0.7); letter-spacing:0.05em; font-family:'IBM Plex Mono',monospace; }
 .card-arrow { font-size:14px; color:var(--amber-dark); flex-shrink:0; transition:color 0.3s,transform 0.3s; font-family:'IBM Plex Mono',monospace; margin-top:2px; }
 .card:hover .card-arrow { color:var(--amber); transform:translateX(4px); }
